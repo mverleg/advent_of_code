@@ -20,8 +20,9 @@ fn descend(dx: usize, dy: usize) -> usize {
     let content = read_to_string("dec03.txt").unwrap();
     let mut lines = content.lines();
     let col_cnt = lines.next().unwrap().len();
+    let lines = lines.skip(dy - 1);
     let mut line_cnt = 1;
-//    println!("{}", col_cnt);  //TODO @mark: TEMPORARY! REMOVE THIS!
+    println!("{}x{}: {}", dx, dy, col_cnt);  //TODO @mark: TEMPORARY! REMOVE THIS!
     for line in lines.step_by(dy) {
         assert!(col_cnt == line.len());
         line_cnt += 1;
@@ -30,13 +31,13 @@ fn descend(dx: usize, dy: usize) -> usize {
         if maybe_tree == '#' {
             count += 1;
         }
-//        println!("{} / {} = {}", line, prev + 1, maybe_tree);  //TODO @mark: TEMPORARY! REMOVE THIS!
-//        if maybe_tree == '#' {
-//            println!("{}# {}", " ".repeat(prev), count);
-//        } else {
-//            println!("{}^ {}", " ".repeat(prev), count);
-//        }
-        col += 3;
+       println!("{} / {} = {}", line, prev + 1, maybe_tree);  //TODO @mark: TEMPORARY! REMOVE THIS!
+       if maybe_tree == '#' {
+           println!("{}# {}", " ".repeat(prev), count);
+       } else {
+           println!("{}^ {}", " ".repeat(prev), count);
+       }
+        col += dx;
     }
     assert!(count < line_cnt);
     count
