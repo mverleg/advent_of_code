@@ -1,6 +1,13 @@
 use ::std::fs::read_to_string;
 
-fn main() {
+#[test]
+fn dec01a() {
+    let res = run1();
+    println!("{}", res);
+}
+
+#[test]
+fn dec01b() {
     let res = run2();
     println!("{}", res);
 }
@@ -10,7 +17,7 @@ fn run1() -> u32 {
     let yrs = read_sorted();
     let mut i2 = yrs.len() - 1;
     for yr1 in &yrs {
-        println!("compare {} and {}", yr1, yrs[i2]);
+        //println!("compare {} and {}", yr1, yrs[i2]);
         while yrs[i2] + yr1 > goal {
             i2 -= 1;
         }
@@ -33,7 +40,7 @@ fn run2() -> u32 {
                 if yr1 + yr2 + yr3 > goal {
                     break
                 }
-                println!("compare {}, {}, {}", yr1, yr2, yr3);
+                //println!("compare {}, {}, {}", yr1, yr2, yr3);
                 if yr1 + yr2 + yr3 == goal {
                     return yr1 * yr2 * yr3;
                 }
@@ -44,7 +51,7 @@ fn run2() -> u32 {
 }
 
 fn read_sorted() -> Vec<u32> {
-    let mut yrs = read_to_string("input.txt")
+    let mut yrs = read_to_string("dec01input.txt")
         .unwrap()
         .lines()
         .filter(|ln| !ln.is_empty())
