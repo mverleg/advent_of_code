@@ -1,7 +1,9 @@
+#![allow(unused)]
 
 mod dec01;
 mod dec02;
+mod dec03;
 
 fn main() {
-    dec02::dec02a()
+    dec03::dec03a()
 }
