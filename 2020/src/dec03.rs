@@ -1,6 +1,10 @@
 use ::std::fs::read_to_string;
 
 pub fn dec03a() {
+    println!("{}", descend(3, 1));
+}
+
+pub fn dec03b() {
     let res = vec![
         descend(1, 1),
         descend(3, 1),
@@ -31,12 +35,12 @@ fn descend(dx: usize, dy: usize) -> usize {
         if maybe_tree == '#' {
             count += 1;
         }
-       println!("{} / {} = {}", line, prev + 1, maybe_tree);  //TODO @mark: TEMPORARY! REMOVE THIS!
-       if maybe_tree == '#' {
-           println!("{}# {}", " ".repeat(prev), count);
-       } else {
-           println!("{}^ {}", " ".repeat(prev), count);
-       }
+        println!("{} / {} = {}", line, prev + 1, maybe_tree);  //TODO @mark: TEMPORARY! REMOVE THIS!
+        if maybe_tree == '#' {
+            println!("{}# {}", " ".repeat(prev), count);
+        } else {
+            println!("{}^ {}", " ".repeat(prev), count);
+        }
         col += dx;
     }
     assert!(count < line_cnt);
