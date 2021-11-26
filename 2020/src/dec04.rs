@@ -12,6 +12,9 @@ lazy_static! {
 
 pub fn dec04a() {
     println!("4a: {}", do_batch(has_all_fields));
+}
+
+pub fn dec04b() {
     println!("4b: {}", do_batch(all_fields_valid));
 }
 
