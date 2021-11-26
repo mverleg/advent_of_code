@@ -1,5 +1,14 @@
 use ::std::fs::read_to_string;
-use std::collections::HashSet;
+use ::std::collections::HashSet;
+use ::lazy_static::lazy_static;
+use ::regex::Regex;
+
+lazy_static! {
+    static ref HEIGHT_RE: Regex = Regex::new(r"^(1[5678]\d\s*cm|19[0-3]\s*cm|59\s*in|6\d\s*in|7[0-6]\s*in)$").unwrap();
+    static ref HAIR_RE: Regex = Regex::new(r"^#[0-9a-f]{6}$").unwrap();
+    static ref EYE_RE: Regex = Regex::new(r"^(amb|blu|brn|gry|grn|hzl|oth)$").unwrap();
+    static ref PASSPORTNR_RE: Regex = Regex::new(r"^[0-9]{9}$").unwrap();
+}
 
 pub fn dec04a() {
     println!("4a: {}", do_batch(has_all_fields));
@@ -56,25 +65,38 @@ fn all_fields_valid(inp: &str) -> bool {
         }
         let value = field.chars().skip(4).collect::<String>();
         if field.starts_with("byr") {
-            if !value.parse::<u32>().map(|yr| yr >= 1920 && yr <= 2002).unwrap_or_else(|_| false) {
+            if !is_year_in_inclusive_range(&value, 1920, 2002) {
                 return false
             }
             //println!("valid byr: {}", &value);
         } else if field.starts_with("iyr") {
-            if !value.parse::<u32>().map(|yr| yr >= 2010 && yr <= 2020).unwrap_or_else(|_| false) {
+            if !is_year_in_inclusive_range(&value, 2010, 2020) {
                 return false
             }
-            //println!("valid iyr: {}", &value);
         } else if field.starts_with("eyr") {
-            return false;  //TODO @mark:
+            if !is_year_in_inclusive_range(&value, 2020, 2030) {
+                return false
+            }
         } else if field.starts_with("hgt") {
-            return false;  //TODO @mark:
+            if !HEIGHT_RE.is_match(&value) {
+                //println!("INvalid hgt: {}", &value);
+                return false;
+            }
+            //println!("valid hgt: {}", &value);
         } else if field.starts_with("hcl") {
-            return false;  //TODO @mark:
+            if !HAIR_RE.is_match(&value) {
+                //println!("INvalid hcl: {}", &value);
+                return false;
+            }
+            //println!("valid hcl: {}", &value);
         } else if field.starts_with("ecl") {
-            return false;  //TODO @mark:
+            if !EYE_RE.is_match(&value) {
+                return false
+            }
         } else if field.starts_with("pid") {
-            return false;  //TODO @mark:
+            if !PASSPORTNR_RE.is_match(&value) {
+                return false
+            }
         } else if field.starts_with("cid") {
             continue;
         } else {
@@ -82,4 +104,8 @@ fn all_fields_valid(inp: &str) -> bool {
         }
     }
     true
+}
+
+fn is_year_in_inclusive_range(value: &str, min: u32, max: u32) -> bool {
+    value.parse::<u32>().map(|yr| yr >= min && yr <= max).unwrap_or_else(|_| false)
 }
