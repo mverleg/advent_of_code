@@ -7,5 +7,5 @@ mod dec04;
 mod dec05;
 
 fn main() {
-    dec05::dec05a()
+    dec05::dec05b()
 }
