@@ -1,13 +1,11 @@
 use ::std::fs::read_to_string;
 
-#[test]
-fn dec01a() {
+pub fn dec01a() {
     let res = run1();
     println!("{}", res);
 }
 
-#[test]
-fn dec01b() {
+pub fn dec01b() {
     let res = run2();
     println!("{}", res);
 }
