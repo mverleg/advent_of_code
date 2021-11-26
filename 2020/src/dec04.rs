@@ -5,10 +5,11 @@ pub fn dec04a() {
     println!("{}", do_batch());
 }
 
+/// Make sure the input ends in newlines
 fn do_batch() -> u32 {
     let mut count = 0;
     let mut current = String::with_capacity(1024);
-    for line in read_to_string("dec04ex.txt").unwrap().lines() {
+    for line in read_to_string("dec04.txt").unwrap().lines() {
         if line.is_empty() {
             if do_entry(&current) {
                 count += 1;
@@ -35,5 +36,11 @@ fn do_entry(inp: &str) -> bool {
         .map(|s| s.chars().take(3).collect::<String>())
         .filter(|s| !s.is_empty())
         .collect::<HashSet<_>>();
-    expected.is_subset(&keys)
+    if expected.is_subset(&keys) {
+        println!("valid: {:?}", &keys);
+        true
+    } else {
+        println!("INvalid: {:?}", &keys);
+        false
+    }
 }
