@@ -51,7 +51,7 @@ fn run2() -> u32 {
 }
 
 fn read_sorted() -> Vec<u32> {
-    let mut yrs = read_to_string("dec01input.txt")
+    let mut yrs = read_to_string("../dec01.txt")
         .unwrap()
         .lines()
         .filter(|ln| !ln.is_empty())
