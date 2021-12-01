@@ -8,30 +8,22 @@ lazy_static! {
     static ref RE: Regex = Regex::new(r"^(\w+):\w*([0-9]+)$").unwrap();
 }
 
-pub fn dec00a() {
+pub fn dec01a() {
     let res = run();
     println!("{}", res);
 }
 
-pub fn dec00b() {
+pub fn dec02b() {
     let res = run();
     println!("{}", res);
 }
 
 fn run() -> u64 {
-    let lines = read_to_string("data/2021/dec00.txt")
+    let lines = read_to_string("data/2021/dec01.txt")
         .unwrap()
         .lines()
         .filter(|ln| !ln.trim().is_empty())
-        .map(|line| {
-            let groups = RE.captures(line).unwrap();
-            Pwd {
-                min: groups[1].parse().unwrap(),
-                max: groups[2].parse().unwrap(),
-                letter: groups[3].chars().next().unwrap(),
-                pass: groups[4].to_owned(),
-            }
-        })
+        .map(|ln| ln.parse::<u64>().unwrap())
         .collect::<Vec<_>>();
 
     let mut counts = HashMap::new();
