@@ -7,6 +7,7 @@ use ::lalrpop_util::ParseError;
 use ::lalrpop_util::lexer::Token;
 
 pub use grammar::*;
+use crate::ast::Expr;
 
 lalrpop_mod!(pub grammar);
 
@@ -113,4 +114,8 @@ fn test_real_exprs() {
     use crate::parse::grammar::RealExprsParser;
     let code = "1.2, 3, -4.5, -6, 7";
     let reals = parse("test", code, |c| RealExprsParser::new().parse(c));
+    let expected = vec![1.2, 3., -4.5, -6., 7.].into_iter()
+        .map(|r| Box::new(Expr::Val(r)))
+        .collect::<Vec<Box<Expr<f64>>>>();
+    assert_eq!(reals, expected);
 }

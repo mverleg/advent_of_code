@@ -1,5 +1,5 @@
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, PartialOrd)]
 pub enum Op {
     Add,
     Sub,
@@ -7,8 +7,8 @@ pub enum Op {
     Div,
 }
 
-#[derive(Debug)]
-pub enum Expr<T> {
+#[derive(Debug, PartialEq, PartialOrd)]
+pub enum Expr<T: PartialEq + PartialOrd> {
     Bin {
         op: Op,
         left: Box<Expr<T>>,
