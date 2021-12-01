@@ -1,7 +1,6 @@
 use ::std::fs::read_to_string;
-
-use crate::parse::parse_file;
-use crate::parse::grammar::Yr2020Dec06Parser;
+use ::std::collections::HashMap;
+use std::collections::HashSet;
 
 pub fn dec06a() {
     let res = run();
@@ -14,9 +13,19 @@ pub fn dec06b() {
 }
 
 fn run() -> u64 {
-    let lines = parse_file("data/2020/dec06ex.txt", |c| Yr2020Dec06Parser::new().parse(c));
-    for line in lines {
-        println!("{:?}", line);
-    }
-    unimplemented!()
+    read_to_string("data/2020/dec06.txt")
+        .unwrap()
+        .lines()
+        .collect::<Vec<_>>()
+        .split(|ln| ln.trim().is_empty())
+        .map(|grp| {
+            grp.iter()
+                .map(|ans| ans.chars().collect::<HashSet<char>>())
+                .reduce(|a, b| a.intersection(&b)
+                    .cloned()
+                    .collect::<HashSet<char>>() )
+                .unwrap()
+                .len() as u64
+        })
+        .sum()
 }

@@ -22,7 +22,7 @@ match {
 
 //pub RealExprs = Commas<RealExpr>;
 
-pub Yr2020Dec06 = Lines<Chrs>;
+pub Yr2020Dec06 = Blocks<Chrs>;
 
 pub RealExprs = Commas<RealExpr>;
 
@@ -76,7 +76,6 @@ Blocks<T>: Vec<T> = {
         }
     }
 };
-
 
 Int: i64 = {
     NEG_INT => <>.parse::<i64>().unwrap(),

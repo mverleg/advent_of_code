@@ -36,3 +36,7 @@ fn run() -> u64 {
     top.sort_by_key(|(count, name)| -count);
     unimplemented!()
 }
+
+pub trait SeparableIter: Iterator {
+
+}
