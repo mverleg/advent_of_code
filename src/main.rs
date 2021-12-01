@@ -9,5 +9,5 @@ mod yr2021;
 use yr2021::*;
 
 fn main() {
-    template::dec00a()
+    yr2020::dec06::dec06a()
 }

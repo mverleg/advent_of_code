@@ -19,6 +19,8 @@ match {
 
 //pub RealExprs = Commas<RealExpr>;
 
+pub Yr2020Dec06 = Lines<Chrs>;
+
 pub RealExprs = Commas<RealExpr>;
 
 RealExpr: Box<Expr<f64>> = {
@@ -53,7 +55,7 @@ Commas<T>: Vec<T> = {
 };
 
 Lines<T>: Vec<T> = {
-    <mut v:(<T> END+)*> <e:T?> => match e {
+    <mut v:(<T> END)*> <e:T?> => match e {
         None => v,
         Some(e) => {
             v.push(e);

@@ -1,5 +1,5 @@
 use ::std::fs::read_to_string;
-use std::collections::HashMap;
+use ::std::collections::HashMap;
 
 use ::lazy_static::lazy_static;
 use ::regex::Regex;
