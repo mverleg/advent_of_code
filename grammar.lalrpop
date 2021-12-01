@@ -1,0 +1,48 @@
+use ::std::str::FromStr;
+
+use crate::parse::{span, Span};
+
+grammar;
+
+match {
+    // Turn newlines into a token (they are skipped by default)
+    r"(\r\n|\n|\r)(\s|\r|\n)?" => END,
+} else {
+    // Match string literals
+    r#"("[^"]*"|([^"]*\\")*)"# => STR,
+} else {
+    // Ignore any other whitespace (except newlines above)
+    r"\s+" => { },
+} else {
+    _
+}
+
+pub Expr: Box<Expr> = {
+    AddSub => <>,
+};
+
+pub AddSub: Box<Expr> = {
+    <l:AddSub> <op:"+"> <r:MulDiv> => Box::new(Expr::Bin { op: Ops::Add, left: l, right: r }),
+    <l:AddSub> <op:"-"> <r:MulDiv> => Box::new(Expr::Bin { op: Ops::Sub, left: l, right: r }),
+    MulDiv,
+};
+
+pub MulDiv: Box<Expr> = {
+    <l:MulDiv> <op:"*"> <r:Unary> => Box::new(Expr::Bin { op: Ops::Mul, left: l, right: r }),
+    <l:MulDiv> <op:"/"> <r:Unary> => Box::new(Expr::Bin { op: Ops::Div, left: l, right: r }),
+    Unary
+};
+
+pub Unary: Box<Expr> = {
+    <op:"-"> <t:Unary> => Box::new(Expr::Uni { op: Ops::Sub, target: t} ),
+};
+
+//Comma<T>: Vec<T> = { // (1)
+//    <mut v:(<T> ",")*> <e:T?> => match e { // (2)
+//        None => v,
+//        Some(e) => {
+//            v.push(e);
+//            v
+//        }
+//    }
+//};

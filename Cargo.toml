@@ -10,3 +10,11 @@ path = "src/main.rs"
 [dependencies]
 lazy_static = "1.4.0"
 regex = "1.5.4"
+lalrpop-util = { version = "0.19.6", features = ["lexer"] }
+
+[build-dependencies]
+lalrpop = "0.19.6"
+
+[profile.dev.package."*"]
+opt-level = 3
+
