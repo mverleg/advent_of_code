@@ -1,5 +1,5 @@
 use ::lalrpop_util::lalrpop_mod;
 
-lalrpop_mod!(pub calculator5);
+lalrpop_mod!(pub grammar);
 
-pub use
+pub use grammar::*;

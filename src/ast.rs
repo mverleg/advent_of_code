@@ -1,6 +1,6 @@
 
 #[derive(Debug)]
-pub enum Ops {
+pub enum Op {
     Add,
     Sub,
     Mul,
@@ -10,13 +10,13 @@ pub enum Ops {
 #[derive(Debug)]
 pub enum Expr<T> {
     Bin {
-        op: String,
-        left: Expr<T>,
-        right: Expr<T>,
+        op: Op,
+        left: Box<Expr<T>>,
+        right: Box<Expr<T>>,
     },
     Uni {
-        op: String,
-        target: Expr<T>,
+        op: Op,
+        target: Box<Expr<T>>,
     },
     Val(T)
 }
