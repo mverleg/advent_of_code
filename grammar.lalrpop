@@ -8,8 +8,11 @@ match {
     // Turn newlines into a token (they are skipped by default)
     r"(\r\n|\n|\r)(\s|\r|\n)?" => END,
 } else {
-    // Match string literals
-    r#"("[^"]*"|([^"]*\\")*)"# => STR,
+    // Match string and number literals
+    r#"("[^"]*"|([^"]*\\")*)"# => DQ_STR,
+    r"-[0-9]+" => NEG_INT,
+    r"[0-9]+" => POS_INT,
+    r"-?[0-9]+\.[0-9]+" => REAL,
 } else {
     // Ignore any other whitespace (except newlines above)
     r"\s+" => { },
@@ -76,25 +79,26 @@ Blocks<T>: Vec<T> = {
 
 
 Int: i64 = {
-    r"-[0-9]+" => <>.parse::<i64>().unwrap(),
+    NEG_INT => <>.parse::<i64>().unwrap(),
     Uint => <> as i64,
 }
 
 Uint: u64 = {
-    r"[0-9]+" => <>.parse::<u64>().unwrap(),
+    POS_INT => <>.parse::<u64>().unwrap(),
 }
 
 Real: f64 = {
     Int => <> as f64,
-    r"-?[0-9]+\.[0-9]+" => <>.parse::<f64>().unwrap(),
+    REAL => <>.parse::<f64>().unwrap(),
 }
 
+/// Warning: cannot start with a number
 Str: String = {
-    STR => <>.to_owned(),
+    <s:r"[^\n\r]*"> => s.to_owned(),
 }
 
 Chrs: Vec<char> = {
-    STR => <>.chars().collect::<Vec<char>>()
+    Str => <>.chars().collect::<Vec<char>>()
 };
 
 //Comma<T>: Vec<T> = { // (1)

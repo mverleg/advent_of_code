@@ -1,12 +1,14 @@
 use ::std::cmp::max;
 use ::std::fmt::Write;
+use ::std::fs::read_to_string;
 use ::std::process::exit;
 
 use ::lalrpop_util::lalrpop_mod;
-use ::lalrpop_util::ParseError;
 use ::lalrpop_util::lexer::Token;
+use ::lalrpop_util::ParseError;
 
 pub use grammar::*;
+
 use crate::ast::Expr;
 
 lalrpop_mod!(pub grammar);
@@ -15,8 +17,8 @@ lalrpop_mod!(pub grammar);
 /// ```
 //  let reals = parse("test", "1.2 3 4.5 6 7", |c| RealExprsParser::new().parse(c));
 /// ```
-pub fn parse<T>(identifier: &str, code: &str, parse: fn(&str) -> Result<T, ParseError<usize, Token<'_>, &'static str>>) -> T {
-    match try_parse(identifier, code, parse) {
+pub fn parse<T>(identifier: &str, code: &str, parse_fn: fn(&str) -> Result<T, ParseError<usize, Token<'_>, &'static str>>) -> T {
+    match try_parse(identifier, code, parse_fn) {
         Ok(val) => val,
         Err(err) => {
             eprintln!("{}", err);
@@ -25,9 +27,14 @@ pub fn parse<T>(identifier: &str, code: &str, parse: fn(&str) -> Result<T, Parse
     }
 }
 
+pub fn parse_file<T>(path: &str, parse_fn: fn(&str) -> Result<T, ParseError<usize, Token<'_>, &'static str>>) -> T {
+    let code = read_to_string(path).map_err(|_| format!("failed to read file '{}'", path)).unwrap();
+    parse(path, &code, parse_fn)
+}
+
 #[rustfmt::skip]
-fn try_parse<T>(identifier: &str, code: &str, parse: fn(&str) -> Result<T, ParseError<usize, Token<'_>, &'static str>>) -> Result<T, String> {
-    match parse(code) {
+fn try_parse<T>(identifier: &str, code: &str, parse_fn: fn(&str) -> Result<T, ParseError<usize, Token<'_>, &'static str>>) -> Result<T, String> {
+    match parse_fn(code) {
         Ok(ast) => Ok(ast),
         Err(err) => Err(match err {
             ParseError::InvalidToken { location } => {
