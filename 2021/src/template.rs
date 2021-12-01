@@ -5,7 +5,7 @@ use ::lazy_static::lazy_static;
 use ::regex::Regex;
 
 lazy_static! {
-    static ref RE: Regex = Regex::new(r"^[0-9]+$").unwrap();
+    static ref RE: Regex = Regex::new(r"^(\w+):\w*([0-9]+)$").unwrap();
 }
 
 pub fn dec00a() {
@@ -19,7 +19,7 @@ pub fn dec00b() {
 }
 
 fn run() -> u64 {
-    let lines = read_to_string("../dec01.txt")
+    let lines = read_to_string("../dec00.txt")
         .unwrap()
         .lines()
         .filter(|ln| !ln.trim().is_empty())

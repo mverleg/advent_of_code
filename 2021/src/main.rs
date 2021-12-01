@@ -1,5 +1,6 @@
 #![allow(unused)]
 
+mod util;
 mod template;
 mod dec01;
 
