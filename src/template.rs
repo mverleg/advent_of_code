@@ -19,7 +19,7 @@ pub fn dec00b() {
 }
 
 fn run() -> u64 {
-    let lines = read_to_string("../dec00.txt")
+    let lines = read_to_string("data/2021/dec00.txt")
         .unwrap()
         .lines()
         .filter(|ln| !ln.trim().is_empty())
