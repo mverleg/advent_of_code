@@ -2,12 +2,6 @@ use ::std::collections::HashMap;
 use ::std::fs::read_to_string;
 
 use ::itertools::Itertools;
-use ::lazy_static::lazy_static;
-use ::regex::Regex;
-
-lazy_static! {
-    static ref RE: Regex = Regex::new(r"^([0-9]+)\s+([0-9]+)$").unwrap();
-}
 
 pub fn dec02a() {
     let lines = get_lines();

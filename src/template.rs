@@ -27,11 +27,7 @@ struct Res {
 
 fn run() -> u64 {
     // Find id with highest total price
-    read_to_string("data/2021/dec00.txt")
-        .unwrap()
-        .lines()
-        .filter(|ln| !ln.trim().is_empty())
-        .map(|ln| ln.to_owned())
+    get_lines("data/2021/dec02.txt").into_iter()
         .map(|line| {
             let groups = RE.captures(&line).unwrap();
             Res {
@@ -48,4 +44,13 @@ fn run() -> u64 {
         .find(|res| true)
         .unwrap()
         .id as u64
+}
+
+fn get_lines(pth: &str) -> Vec<String> {
+    let content = read_to_string(pth).unwrap();
+    content
+        .lines()
+        .filter(|ln| !ln.trim().is_empty())
+        .map(|ln| ln.to_owned())
+        .collect::<Vec<_>>()
 }
