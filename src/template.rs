@@ -31,8 +31,9 @@ fn run() -> u64 {
         .unwrap()
         .lines()
         .filter(|ln| !ln.trim().is_empty())
+        .map(|ln| ln.to_owned())
         .map(|line| {
-            let groups = RE.captures(line).unwrap();
+            let groups = RE.captures(&line).unwrap();
             Res {
                 id: groups[1].parse().unwrap(),
                 price: groups[2].parse().unwrap(),
