@@ -5,10 +5,6 @@ use ::itertools::Itertools;
 use ::lazy_static::lazy_static;
 use ::regex::Regex;
 
-lazy_static! {
-    static ref RE: Regex = Regex::new(r"^([0-9]+)\s+([0-9]+)$").unwrap();
-}
-
 pub fn part_a() {
     let res = run();
     println!("{}", res);
@@ -19,31 +15,25 @@ pub fn part_b() {
     println!("{}", res);
 }
 
-#[derive(Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
-struct Res {
-    id: u32,
-    price: u32,
-}
-
 fn run() -> u64 {
-    // Find id with highest total price
-    get_lines("data/2021/dec02.txt").into_iter()
-        .map(|line| {
-            let groups = RE.captures(&line).unwrap();
-            Res {
-                id: groups[1].parse().unwrap(),
-                price: groups[2].parse().unwrap(),
-            }
-        })
-        .into_group_map_by(|res| res.id)
-        .into_iter()
-        .map(|(k, v)| Res { id: k, price: v.iter().map(|res| res.price).sum() })
-        .inspect(|res| println!("item {} total price {}", res.id, res.price))
-        .sorted_by_key(|res| res.price)
-        .rev()
-        .find(|res| true)
-        .unwrap()
-        .id as u64
+    let mut map = HashMap::<String, String>::new();
+    for line in get_lines("data/2020/dec07.txt") {
+        let (outer, inner) = line.split_once(" bags contain ").unwrap();
+        if inner == "no other bags." {
+            continue;
+        }
+        let inners = inner.split(", ")
+            .map(|bag| {
+                let parts = bag.split(" ").collect::<Vec<_>>();
+                format!("{} {}", parts[1], parts[2])
+            })
+            .collect::<Vec<_>>();
+        for inner in inners {
+            map.insert(outer.to_owned(), inner);
+        }
+    }
+    unimplemented!()
+
 }
 
 fn get_lines(pth: &str) -> Vec<String> {
