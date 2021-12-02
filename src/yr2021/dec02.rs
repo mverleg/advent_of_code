@@ -33,18 +33,20 @@ fn run() -> u64 {
         .collect::<Vec<_>>();
     let mut hor = 0u64;
     let mut depth = 0u64;
+    let mut aim = 0u64;
     for line in lines {
         let parts = line.split(" ").collect::<Vec<_>>();
         let (dir, amt) = (parts[0], parts[1].parse::<u64>().unwrap());
         match dir {
             "forward" => {
-                hor += amt
+                hor += amt;
+                depth += aim * amt;
             },
             "up" => {
-                depth -= amt
+                aim -= amt
             },
             "down" => {
-                depth += amt
+                aim += amt
             },
             _ => unreachable!(),
         }
