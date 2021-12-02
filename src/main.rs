@@ -6,10 +6,7 @@ mod parse;
 mod yr2020;
 mod yr2021;
 
-use yr2021::*;
-use crate::template::dec00a;
-
 fn main() {
-    dec02::dec02a();
-    dec02::dec02b();
+    yr2020::dec07::part_a();
+    yr2020::dec07::part_b();
 }

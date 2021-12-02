@@ -5,3 +5,4 @@ pub mod dec03;
 pub mod dec04;
 pub mod dec05;
 pub mod dec06;
+pub mod dec07;
