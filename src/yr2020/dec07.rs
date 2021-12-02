@@ -1,5 +1,6 @@
 use ::std::collections::HashMap;
 use ::std::fs::read_to_string;
+use std::collections::HashSet;
 
 use ::itertools::Itertools;
 use ::lazy_static::lazy_static;
@@ -16,7 +17,7 @@ pub fn part_b() {
 }
 
 fn run() -> u64 {
-    let mut map = HashMap::<String, String>::new();
+    let mut map = HashMap::<String, HashSet<String>>::new();
     for line in get_lines("data/2020/dec07.txt") {
         let (outer, inner) = line.split_once(" bags contain ").unwrap();
         if inner == "no other bags." {
@@ -29,11 +30,28 @@ fn run() -> u64 {
             })
             .collect::<Vec<_>>();
         for inner in inners {
-            map.insert(outer.to_owned(), inner);
+            if !map.contains_key(&inner) {
+                map.insert(inner.clone(), HashSet::new());
+            }
+            map.get_mut(&inner).unwrap().insert(outer.to_owned());
         }
     }
-    unimplemented!()
 
+    dbg!(find_outer(&map, "shiny gold")); //TODO @mark: TEMPORARY! REMOVE THIS!
+    find_outer(&map, "shiny gold").len() as u64
+}
+
+fn find_outer(map: &HashMap<String, HashSet<String>>, color: &str) -> HashSet<String> {
+    let mut set = map.get(color)
+        .map(|s| s.clone())
+        .unwrap_or_else(|| HashSet::new());
+    for outer_col in set.clone() {
+        // if set.contains(&outer_col) {
+        //     continue
+        // }
+        set.extend(find_outer(map, &outer_col))
+    }
+    set
 }
 
 fn get_lines(pth: &str) -> Vec<String> {
