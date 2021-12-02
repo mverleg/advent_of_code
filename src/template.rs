@@ -1,11 +1,12 @@
-use ::std::fs::read_to_string;
 use ::std::collections::HashMap;
+use ::std::fs::read_to_string;
 
+use ::itertools::Itertools;
 use ::lazy_static::lazy_static;
 use ::regex::Regex;
 
 lazy_static! {
-    static ref RE: Regex = Regex::new(r"^(\w+):\w*([0-9]+)$").unwrap();
+    static ref RE: Regex = Regex::new(r"^([0-9]+)\s+([0-9]+)$").unwrap();
 }
 
 pub fn dec00a() {
@@ -18,40 +19,32 @@ pub fn dec00b() {
     println!("{}", res);
 }
 
-// #[derive(Debug)]
-// struct Pwd {
-//     min: u32,
-//     max: u32,
-//     letter: char,
-//     pass: String,
-// }
+#[derive(Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
+struct Res {
+    id: u32,
+    price: u32,
+}
 
 fn run() -> u64 {
-    unimplemented!();
+    // Find id with highest total price
+    read_to_string("data/2021/dec00.txt")
+        .unwrap()
+        .lines()
+        .filter(|ln| !ln.trim().is_empty())
+        .map(|line| {
+            let groups = RE.captures(line).unwrap();
+            Res {
+                id: groups[1].parse().unwrap(),
+                price: groups[2].parse().unwrap(),
+            }
+        })
+        .into_group_map_by(|res| res.id)
+        .into_iter()
+        .map(|(k, v)| Res { id: k, price: v.iter().map(|res| res.price).sum() })
+        .inspect(|res| println!("item {} total price {}", res.id, res.price))
+        .sorted_by_key(|res| res.price)
+        .rev()
+        .find(|res| true)
+        .unwrap()
+        .id as u64
 }
-    // let lines = read_to_string("data/2021/dec00.txt")
-    //     .unwrap()
-//         .lines()
-//         .filter(|ln| !ln.trim().is_empty())
-//         .map(|line| {
-//             let groups = RE.captures(line).unwrap();
-//             // Pwd {
-//             //     min: groups[1].parse().unwrap(),
-//             //     max: groups[2].parse().unwrap(),
-//             //     letter: groups[3].chars().next().unwrap(),
-//             //     pass: groups[4].to_owned(),
-//             // }
-//             (0u32, 0u32)
-//         })
-//         .collect::<Vec<_>>();
-//
-//     let mut counts = HashMap::new();
-//     // for line in lines {
-//     //     *counts.entry(line[0]).or_insert(0) += 1;
-//     // }
-//     let mut top = counts.into_iter()
-//         .map(|(name, count)| (count, name))
-//         .collect::<Vec<_>>();
-//     top.sort_by_key(|(count, name)| -count);
-//     unimplemented!()
-// }
