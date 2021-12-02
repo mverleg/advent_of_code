@@ -18,29 +18,40 @@ pub fn dec00b() {
     println!("{}", res);
 }
 
-fn run() -> u64 {
-    let lines = read_to_string("data/2021/dec00.txt")
-        .unwrap()
-        .lines()
-        .filter(|ln| !ln.trim().is_empty())
-        .map(|line| {
-            let groups = RE.captures(line).unwrap();
-            Pwd {
-                min: groups[1].parse().unwrap(),
-                max: groups[2].parse().unwrap(),
-                letter: groups[3].chars().next().unwrap(),
-                pass: groups[4].to_owned(),
-            }
-        })
-        .collect::<Vec<_>>();
+// #[derive(Debug)]
+// struct Pwd {
+//     min: u32,
+//     max: u32,
+//     letter: char,
+//     pass: String,
+// }
 
-    let mut counts = HashMap::new();
-    for line in lines {
-        *counts.entry(line).or_insert(0) += 1;
-    }
-    let mut top = counts.into_iter()
-        .map(|(name, count)| (count, name))
-        .collect::<Vec<_>>();
-    top.sort_by_key(|(count, name)| -count);
-    unimplemented!()
+fn run() -> u64 {
+    unimplemented!();
 }
+    // let lines = read_to_string("data/2021/dec00.txt")
+    //     .unwrap()
+//         .lines()
+//         .filter(|ln| !ln.trim().is_empty())
+//         .map(|line| {
+//             let groups = RE.captures(line).unwrap();
+//             // Pwd {
+//             //     min: groups[1].parse().unwrap(),
+//             //     max: groups[2].parse().unwrap(),
+//             //     letter: groups[3].chars().next().unwrap(),
+//             //     pass: groups[4].to_owned(),
+//             // }
+//             (0u32, 0u32)
+//         })
+//         .collect::<Vec<_>>();
+//
+//     let mut counts = HashMap::new();
+//     // for line in lines {
+//     //     *counts.entry(line[0]).or_insert(0) += 1;
+//     // }
+//     let mut top = counts.into_iter()
+//         .map(|(name, count)| (count, name))
+//         .collect::<Vec<_>>();
+//     top.sort_by_key(|(count, name)| -count);
+//     unimplemented!()
+// }

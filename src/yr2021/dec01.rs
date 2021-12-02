@@ -9,30 +9,36 @@ lazy_static! {
 }
 
 pub fn dec01a() {
-    let res = run();
+    let res = run(false);
     println!("{}", res);
 }
 
-pub fn dec02b() {
-    let res = run();
+pub fn dec01b() {
+    let res = run(true);
     println!("{}", res);
 }
 
-fn run() -> u64 {
-    let lines = read_to_string("data/2021/dec01.txt")
+fn run(slide: bool) -> u64 {
+    let mut depths = read_to_string("data/2021/dec01.txt")
         .unwrap()
         .lines()
         .filter(|ln| !ln.trim().is_empty())
-        .map(|ln| ln.parse::<u64>().unwrap())
+        .map(|ln| ln.parse::<u32>().unwrap())
         .collect::<Vec<_>>();
-
-    let mut counts = HashMap::new();
-    for line in lines {
-        *counts.entry(line).or_insert(0) += 1;
+    if slide {
+        let mut slid = vec![];
+        for i in 0 .. depths.len() - 2 {
+            slid.push(depths[i] + depths[i + 1] + depths[i + 2]);
+        }
+        depths = slid;
     }
-    let mut top = counts.into_iter()
-        .map(|(name, count)| (count, name))
-        .collect::<Vec<_>>();
-    top.sort_by_key(|(count, name)| -count);
-    unimplemented!()
+    let mut last = depths[0];
+    let mut increase_cnt = 0;
+    for dep in depths {
+        if dep > last {
+            increase_cnt += 1;
+        }
+        last = dep;
+    }
+    increase_cnt
 }
