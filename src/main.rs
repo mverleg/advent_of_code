@@ -10,7 +10,6 @@ use yr2021::*;
 use crate::template::dec00a;
 
 fn main() {
-    dec01::dec01a();
-    dec01::dec01b();
-    dec00a()
+    dec02::dec02a();
+    dec02::dec02b();
 }
