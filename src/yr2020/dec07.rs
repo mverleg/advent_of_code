@@ -1,6 +1,7 @@
 use ::std::collections::HashMap;
 use ::std::collections::HashSet;
 use ::std::fs::read_to_string;
+use std::assert_matches::assert_matches;
 
 use ::itertools::Itertools;
 use ::lazy_static::lazy_static;
@@ -10,7 +11,9 @@ use nom::character::streaming::alphanumeric1;
 use nom::error::{context, VerboseError};
 use nom::{Err, IResult};
 use nom::combinator::{map, map_res};
-use nom::sequence::{separated_pair, tuple};
+use nom::Err::Incomplete;
+use nom::Needed::Size;
+use nom::sequence::{pair, separated_pair, tuple};
 
 pub fn part_a() {
     let mut map = HashMap::<String, HashSet<String>>::new();
@@ -54,7 +57,7 @@ struct Bag<'a> {
 }
 
 impl<'a> Bag<'a> {
-    fn new((adj, color): (&'a str, &'a str)) -> Self {
+    fn new(adj: &'a str, color: &'a str) -> Self {
         Bag { adj, color }
     }
 }
@@ -62,18 +65,22 @@ impl<'a> Bag<'a> {
 fn bag_color(input: &str) -> Res<&str, Bag> {
     context("bag",
             map(
-                separated_pair(
-                    alphanumeric1,
-                    tag(" "),
-                    alphanumeric1),
-                Bag::new,
+                pair(
+                    separated_pair(
+                        alphanumeric1,
+                        tag(" "),
+                        alphanumeric1),
+                    tag(" bags"),
+                ),
+                |((adj, color), _)| Bag::new(adj, color),
             ),
     )(input)
 }
 
 #[test]
 fn bag_color_test() {
-    assert_eq!(bag_color("light blue!"), Ok(("!", Bag { adj: "light", color: "blue" })))
+    assert_matches!(bag_color("orange"), Err(Incomplete(_)));
+    assert_eq!(bag_color("light blue bags!"), Ok(("!", Bag { adj: "light", color: "blue" })));
 }
 
 fn find_outer(map: &HashMap<String, HashSet<String>>, color: &str) -> HashSet<String> {

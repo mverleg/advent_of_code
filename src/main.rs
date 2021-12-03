@@ -1,3 +1,4 @@
+#![feature(assert_matches)]
 #![allow(unused)]
 
 mod template;
