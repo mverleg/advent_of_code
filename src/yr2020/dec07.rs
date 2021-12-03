@@ -1,22 +1,17 @@
 use ::std::collections::HashMap;
+use ::std::collections::HashSet;
 use ::std::fs::read_to_string;
-use std::collections::HashSet;
 
 use ::itertools::Itertools;
 use ::lazy_static::lazy_static;
 use ::regex::Regex;
+use nom::bytes::complete::tag;
+use nom::character::streaming::alphanumeric1;
+use nom::error::{context, VerboseError};
+use nom::{Err, IResult};
+use nom::sequence::{separated_pair, tuple};
 
 pub fn part_a() {
-    let res = run();
-    println!("{}", res);
-}
-
-pub fn part_b() {
-    let res = run();
-    println!("{}", res);
-}
-
-fn run() -> u64 {
     let mut map = HashMap::<String, HashSet<String>>::new();
     for line in get_lines("data/2020/dec07.txt") {
         let (outer, inner) = line.split_once(" bags contain ").unwrap();
@@ -36,9 +31,35 @@ fn run() -> u64 {
             map.get_mut(&inner).unwrap().insert(outer.to_owned());
         }
     }
+    let res = find_outer(&map, "shiny gold").len() as u64;
+    println!("{}", res);
+}
 
-    dbg!(find_outer(&map, "shiny gold")); //TODO @mark: TEMPORARY! REMOVE THIS!
-    find_outer(&map, "shiny gold").len() as u64
+pub fn part_b() {
+    let content = read_to_string("data/2020/dec07.txt").unwrap();
+    bag_color(&content);
+
+
+    let res = 0;
+    println!("{}", res);
+}
+
+type Res<T, U> = IResult<T, U, VerboseError<T>>;
+
+#[derive(Debug, PartialEq, Eq, Hash)]
+struct Bag<'a> {
+    adj: &'a str,
+    color: &'a str,
+}
+
+fn bag_color(input: &str) -> Res<&str, Bag> {
+    context("bag",
+            separated_pair(
+                alphanumeric1,
+                tag(" "),
+                alphanumeric1),
+    )(input)
+        .map(|(next, (adj, color))| (next, Bag { adj, color }))
 }
 
 fn find_outer(map: &HashMap<String, HashSet<String>>, color: &str) -> HashSet<String> {
