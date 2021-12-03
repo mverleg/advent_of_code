@@ -9,6 +9,7 @@ use nom::bytes::complete::tag;
 use nom::character::streaming::alphanumeric1;
 use nom::error::{context, VerboseError};
 use nom::{Err, IResult};
+use nom::combinator::{map, map_res};
 use nom::sequence::{separated_pair, tuple};
 
 pub fn part_a() {
@@ -52,14 +53,27 @@ struct Bag<'a> {
     color: &'a str,
 }
 
+impl<'a> Bag<'a> {
+    fn new((adj, color): (&'a str, &'a str)) -> Self {
+        Bag { adj, color }
+    }
+}
+
 fn bag_color(input: &str) -> Res<&str, Bag> {
     context("bag",
-            separated_pair(
-                alphanumeric1,
-                tag(" "),
-                alphanumeric1),
+            map(
+                separated_pair(
+                    alphanumeric1,
+                    tag(" "),
+                    alphanumeric1),
+                Bag::new,
+            ),
     )(input)
-        .map(|(next, (adj, color))| (next, Bag { adj, color }))
+}
+
+#[test]
+fn bag_color_test() {
+    assert_eq!(bag_color("light blue!"), Ok(("!", Bag { adj: "light", color: "blue" })))
 }
 
 fn find_outer(map: &HashMap<String, HashSet<String>>, color: &str) -> HashSet<String> {
