@@ -1,21 +1,22 @@
+use ::std::assert_matches::assert_matches;
 use ::std::collections::HashMap;
 use ::std::collections::HashSet;
 use ::std::fs::read_to_string;
-use std::assert_matches::assert_matches;
 
 use ::itertools::Itertools;
 use ::lazy_static::lazy_static;
+use ::nom::{Err, IResult};
+use ::nom::branch::alt;
+use ::nom::bytes::complete::tag;
+use ::nom::character::complete::{digit1, space1};
+use ::nom::character::streaming::alphanumeric1;
+use ::nom::combinator::{map, map_res};
+use ::nom::Err::Incomplete;
+use ::nom::error::{context, convert_error, VerboseError};
+use ::nom::Needed::Size;
+use ::nom::sequence::{pair, separated_pair, tuple};
 use ::regex::Regex;
-use nom::bytes::complete::tag;
-use nom::character::streaming::alphanumeric1;
-use nom::error::{context, convert_error, VerboseError};
-use nom::{Err, IResult};
-use nom::branch::alt;
-use nom::character::complete::{digit1, space1};
-use nom::combinator::{map, map_res};
-use nom::Err::Incomplete;
-use nom::Needed::Size;
-use nom::sequence::{pair, separated_pair, tuple};
+use nom::multi::many1;
 
 pub fn part_a() {
     let mut map = HashMap::<String, HashSet<String>>::new();
@@ -64,35 +65,50 @@ impl<'a> Bag<'a> {
     }
 }
 
+fn parse_u32(input: &str) -> Res<&str, u32> {
+    context("positive number", map(digit1, |cnt: &str| cnt.parse::<u32>().unwrap()))(input)
+}
+
 fn bag_color(input: &str) -> Res<&str, Bag> {
-    context("bag",
-            map(
-                tuple((
-                    alphanumeric1,
-                    space1,
-                    alphanumeric1,
-                    alt((tag(" bags"), tag(" bag"))),
-                )),
-                |(adj, _, color, _)| Bag::new(adj, color),
-            ),
-    )(input)
+    context("bag", map(
+        tuple((
+            alphanumeric1,
+            space1,
+            alphanumeric1,
+            alt((tag(" bags"), tag(" bag"))),
+        )),
+        |(adj, _, color, _)| Bag::new(adj, color),
+    ))(input)
 }
 
 fn bag_count(input: &str) -> Res<&str, (u32, Bag)> {
-    context("count",
-            map(
-                tuple((
-                    parse_u32,
-                    space1,
-                    bag_color,
-                )),
-                |(cnt, _, bag)| (cnt, bag),
-            ),
-    )(input)
+    context("count", map(
+        tuple((
+            parse_u32,
+            space1,
+            bag_color,
+            alt((tag(","), tag(".")))
+        )),
+        |(cnt, _, bag, _)| (cnt, bag),
+    ))(input)
 }
 
-fn parse_u32(input: &str) -> Res<&str, u32> {
-    context("positive number", map(digit1, |cnt: &str| cnt.parse::<u32>().unwrap()))(input)
+fn no_bags(input: &str) -> Res<&str, Vec<(u32, Bag)>> {
+    map(tag("no other bags."), |_| vec![])(input)
+}
+
+fn line(input: &str) -> Res<&str, (Bag, Vec<(u32, Bag)>)> {
+    context("line", map(
+        tuple((
+            bag_color,
+            tag(" contain "),
+            alt((
+                no_bags,
+                many1(bag_count),
+            )),
+        )),
+        |(outer, _, inner)| (outer, inner),
+    ))(input)
 }
 
 #[test]
@@ -103,14 +119,26 @@ fn bag_color_test() {
 
 #[test]
 fn bag_count_test() {
-    assert_eq!(bag_count("1 light blue bag."), Ok((".", (1, Bag { adj: "light", color: "blue" }))));
-    assert_eq!(bag_count("3 light blue bags."), Ok((".", (3, Bag { adj: "light", color: "blue" }))));
+    assert_eq!(bag_count("1 light blue bag.!"), Ok(("!", (1, Bag { adj: "light", color: "blue" }))));
+    assert_eq!(bag_count("3 light blue bags.!"), Ok(("!", (3, Bag { adj: "light", color: "blue" }))));
     let inp = "1 light blue sky.";
     match bag_count(inp).unwrap_err() {
         Err::Error(err) =>
             assert!(convert_error(inp, err).contains("at line 1, in Tag:")),
         _ => panic!(),
     }
+}
+
+// bright white bags contain 1 shiny gold bag.
+// shiny gold bags contain 1 dark olive bag, 2 vibrant plum bags.
+// faded blue bags contain no other bags.
+//TODO @mark: ^
+
+#[test]
+fn line_test() {
+    assert_eq!(line("faded blue bags contain no other bags."), Ok(("", (Bag { adj: "faded", color: "blue" }, vec![]))));
+    assert_eq!(line("bright white bags contain 1 shiny gold bag."), Ok(("", (Bag { adj: "bright", color: "white" }, vec![]))));
+    assert_eq!(line("shiny gold bags contain 1 dark olive bag, 2 vibrant plum bags."), Ok(("", (Bag { adj: "bright", color: "white" }, vec![]))));
 }
 
 fn find_outer(map: &HashMap<String, HashSet<String>>, color: &str) -> HashSet<String> {
