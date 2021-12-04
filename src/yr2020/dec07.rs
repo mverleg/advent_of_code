@@ -51,16 +51,16 @@ pub fn part_b() {
     let bags = lines(&content).into_iter()
         //.inspect(|(outer, inner)| println!("{:?}", outer))
         .collect::<HashMap<Bag, Vec<(u32, Bag)>>>();
-    let res = count_inner(&bags, &Bag { adj: "shiny", color: "gold" });
+    let res = count_inner(&bags, &Bag { adj: "shiny", color: "gold" }) - 1;
     println!("{}", res);
 }
 
 fn count_inner(bags: &HashMap<Bag, Vec<(u32, Bag)>>, bag: &Bag) -> u32 {
     match bags.get(bag) {
         Some(sub_bags) => sub_bags.iter()
-            .map(|(cnt, sub_bag)| cnt + count_inner(bags, sub_bag))
-            .sum(),
-        None => 0
+            .map(|(cnt, sub_bag)| cnt * count_inner(bags, sub_bag))
+            .sum::<u32>() + 1,
+        None => 1
     }
 }
 
