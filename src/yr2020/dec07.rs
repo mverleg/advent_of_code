@@ -15,11 +15,12 @@ use ::nom::combinator::{map, map_res};
 use ::nom::combinator::opt;
 use ::nom::Err::Incomplete;
 use ::nom::error::{context, convert_error, VerboseError};
+use ::nom::multi::many0;
 use ::nom::multi::many1;
 use ::nom::Needed::Size;
 use ::nom::sequence::{pair, separated_pair, tuple};
 use ::regex::Regex;
-use nom::multi::many0;
+use nom::combinator::complete;
 
 pub fn part_a() {
     let mut map = HashMap::<String, HashSet<String>>::new();
@@ -50,9 +51,7 @@ pub fn part_b() {
     let bags = lines(&content).into_iter()
         //.inspect(|(outer, inner)| println!("{:?}", outer))
         .collect::<HashMap<Bag, Vec<(u32, Bag)>>>();
-    dbg!(bags.len());
-    count_inner(&bags, &Bag { adj: "shiny", color: "gold" });
-    let res = 0;
+    let res = count_inner(&bags, &Bag { adj: "shiny", color: "gold" });
     println!("{}", res);
 }
 
@@ -129,9 +128,9 @@ fn line(input: &str) -> Res<&str, (Bag, Inner)> {
 }
 
 fn lines(input: &str) -> Vec<(Bag, Inner)> {
-    let tmp = many1(line)(input);  //TODO @mark: TEMPORARY! REMOVE THIS!
-    let (rem, ast) = map(pair(many1(line), many0(newline)),
-        |(bags, _)| bags)(&input).unwrap();
+    // `complete` is necessary here, see https://github.com/Geal/nom/issues/790#issuecomment-405701501
+    let (rem, ast) = map(pair(many1(complete(line)), many0(newline)),
+        |(bags, _)| bags)(input).unwrap();
     assert!(rem.is_empty());
     ast
 }
