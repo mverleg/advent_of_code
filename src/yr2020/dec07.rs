@@ -10,6 +10,8 @@ use nom::bytes::complete::tag;
 use nom::character::streaming::alphanumeric1;
 use nom::error::{context, VerboseError};
 use nom::{Err, IResult};
+use nom::branch::alt;
+use nom::character::complete::{digit1, space1};
 use nom::combinator::{map, map_res};
 use nom::Err::Incomplete;
 use nom::Needed::Size;
@@ -65,22 +67,44 @@ impl<'a> Bag<'a> {
 fn bag_color(input: &str) -> Res<&str, Bag> {
     context("bag",
             map(
-                pair(
-                    separated_pair(
-                        alphanumeric1,
-                        tag(" "),
-                        alphanumeric1),
-                    tag(" bags"),
-                ),
-                |((adj, color), _)| Bag::new(adj, color),
+                tuple((
+                    alphanumeric1,
+                    space1,
+                    alphanumeric1,
+                    alt((tag(" bags"), tag(" bag"))),
+                )),
+                |(adj, _, color, _)| Bag::new(adj, color),
             ),
     )(input)
+}
+
+fn bag_count(input: &str) -> Res<&str, (u32, Bag)> {
+    context("count",
+            map(
+                tuple((
+                    parse_u32,
+                    space1,
+                    bag_color,
+                )),
+                |(cnt, _, bag)| (cnt, bag),
+            ),
+    )(input)
+}
+
+fn parse_u32(input: &str) -> Res<&str, u32> {
+    context("positive number", map(digit1, |cnt: &str| cnt.parse::<u32>().unwrap()))(input)
 }
 
 #[test]
 fn bag_color_test() {
     assert_matches!(bag_color("orange"), Err(Incomplete(_)));
     assert_eq!(bag_color("light blue bags!"), Ok(("!", Bag { adj: "light", color: "blue" })));
+}
+
+#[test]
+fn bag_count_test() {
+    assert_eq!(bag_count("1 light blue bag."), Ok((".", (1, Bag { adj: "light", color: "blue" }))));
+    assert_eq!(bag_count("3 light blue bags."), Ok((".", (3, Bag { adj: "light", color: "blue" }))));
 }
 
 fn find_outer(map: &HashMap<String, HashSet<String>>, color: &str) -> HashSet<String> {
