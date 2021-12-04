@@ -8,7 +8,7 @@ use ::lazy_static::lazy_static;
 use ::regex::Regex;
 use nom::bytes::complete::tag;
 use nom::character::streaming::alphanumeric1;
-use nom::error::{context, VerboseError};
+use nom::error::{context, convert_error, VerboseError};
 use nom::{Err, IResult};
 use nom::branch::alt;
 use nom::character::complete::{digit1, space1};
@@ -97,14 +97,20 @@ fn parse_u32(input: &str) -> Res<&str, u32> {
 
 #[test]
 fn bag_color_test() {
-    assert_matches!(bag_color("orange"), Err(Incomplete(_)));
     assert_eq!(bag_color("light blue bags!"), Ok(("!", Bag { adj: "light", color: "blue" })));
+    assert_matches!(bag_color("orange"), Err(Incomplete(_)));
 }
 
 #[test]
 fn bag_count_test() {
     assert_eq!(bag_count("1 light blue bag."), Ok((".", (1, Bag { adj: "light", color: "blue" }))));
     assert_eq!(bag_count("3 light blue bags."), Ok((".", (3, Bag { adj: "light", color: "blue" }))));
+    let inp = "1 light blue sky.";
+    match bag_count(inp).unwrap_err() {
+        Err::Error(err) =>
+            assert!(convert_error(inp, err).contains("at line 1, in Tag:")),
+        _ => panic!(),
+    }
 }
 
 fn find_outer(map: &HashMap<String, HashSet<String>>, color: &str) -> HashSet<String> {
