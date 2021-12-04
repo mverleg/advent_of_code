@@ -9,16 +9,17 @@ use ::nom::{Err, IResult};
 use ::nom::branch::alt;
 use ::nom::bytes::complete::tag;
 use ::nom::character::complete::{digit1, space1};
+use ::nom::character::complete::newline;
 use ::nom::character::streaming::alphanumeric1;
 use ::nom::combinator::{map, map_res};
+use ::nom::combinator::opt;
 use ::nom::Err::Incomplete;
 use ::nom::error::{context, convert_error, VerboseError};
 use ::nom::multi::many1;
 use ::nom::Needed::Size;
 use ::nom::sequence::{pair, separated_pair, tuple};
 use ::regex::Regex;
-use ::smallvec::SmallVec;
-use smallvec::smallvec;
+use nom::multi::many0;
 
 pub fn part_a() {
     let mut map = HashMap::<String, HashSet<String>>::new();
@@ -46,11 +47,22 @@ pub fn part_a() {
 
 pub fn part_b() {
     let content = read_to_string("data/2020/dec07.txt").unwrap();
-    bag_color(&content);
-
-
+    let bags = lines(&content).into_iter()
+        //.inspect(|(outer, inner)| println!("{:?}", outer))
+        .collect::<HashMap<Bag, Vec<(u32, Bag)>>>();
+    dbg!(bags.len());
+    count_inner(&bags, &Bag { adj: "shiny", color: "gold" });
     let res = 0;
     println!("{}", res);
+}
+
+fn count_inner(bags: &HashMap<Bag, Vec<(u32, Bag)>>, bag: &Bag) -> u32 {
+    match bags.get(bag) {
+        Some(sub_bags) => sub_bags.iter()
+            .map(|(cnt, sub_bag)| cnt + count_inner(bags, sub_bag))
+            .sum(),
+        None => 0
+    }
 }
 
 type Res<T, U> = IResult<T, U, VerboseError<T>>;
@@ -110,9 +122,18 @@ fn line(input: &str) -> Res<&str, (Bag, Inner)> {
                 no_bags,
                 many1(bag_count),
             )),
+            opt(newline),
         )),
-        |(outer, _, inner)| (outer, inner),
+        |(outer, _, inner, _)| (outer, inner),
     ))(input)
+}
+
+fn lines(input: &str) -> Vec<(Bag, Inner)> {
+    let tmp = many1(line)(input);  //TODO @mark: TEMPORARY! REMOVE THIS!
+    let (rem, ast) = map(pair(many1(line), many0(newline)),
+        |(bags, _)| bags)(&input).unwrap();
+    assert!(rem.is_empty());
+    ast
 }
 
 #[test]
@@ -143,14 +164,18 @@ fn line_test() {
                Ok(("", (Bag { adj: "shiny", color: "gold" }, vec![(1, Bag { adj: "dark", color: "olive" }), (2, Bag { adj: "vibrant", color: "plum" })]))));
 }
 
+#[test]
+fn multi_line() {
+    assert_eq!(lines("faded blue bags contain no other bags.\nbright white bags contain 1 shiny gold bag.\n\n"),
+               vec![(Bag { adj: "faded", color: "blue" }, vec![]),
+                    (Bag { adj: "bright", color: "white" }, vec![(1, Bag { adj: "shiny", color: "gold" })])]);
+}
+
 fn find_outer(map: &HashMap<String, HashSet<String>>, color: &str) -> HashSet<String> {
     let mut set = map.get(color)
         .map(|s| s.clone())
         .unwrap_or_else(|| HashSet::new());
     for outer_col in set.clone() {
-        // if set.contains(&outer_col) {
-        //     continue
-        // }
         set.extend(find_outer(map, &outer_col))
     }
     set
