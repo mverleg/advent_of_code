@@ -13,6 +13,7 @@ regex = "1.5.4"
 itertools = "0.10.1"
 lalrpop-util = { version = "0.19.6", features = ["lexer"] }
 nom = "7.1.0"
+smallvec = "1.7.0"
 
 [build-dependencies]
 lalrpop = "0.19.6"
