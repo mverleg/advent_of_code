@@ -19,7 +19,7 @@ pub fn part_b() {
     println!("{}", res);
 }
 
-#[derive(Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Hash, PartialEq, Eq, PartialOrd, Ord, Clone)]
 struct Res {
     id: u32,
     price: u32,

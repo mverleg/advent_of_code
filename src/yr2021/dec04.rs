@@ -22,7 +22,7 @@ pub fn part_b() {
 const SZ: usize = 5;
 const DONE: u8 = u8::MAX;
 
-#[derive(Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Hash, PartialEq, Eq, PartialOrd, Ord, Clone)]
 struct Board {
     nrs: Vec<Vec<u8>>,
 }
@@ -107,16 +107,17 @@ fn run2() -> u32 {
 
     for pick in picks {
         let mut not_win_boards = vec![];
-        for mut board in boards {
+        let is_last = boards.len() == 1;
+        for mut board in &mut boards {
             board.mark(pick);
             if board.is_win() {
                 // assumes there is only one last board, i.e. not two winning in the same round
-                if boards.len() == 1 {
+                if is_last {
                     return board.remaining_score() * (pick as u32)
                 }
                 continue;
             }
-            not_win_boards.push(board);
+            not_win_boards.push(board.clone());
         }
         boards = not_win_boards;
     }
