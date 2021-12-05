@@ -32,12 +32,14 @@ impl Board {
         Board { nrs }
     }
 
-    pub fn mark(&mut self, nr: u8) {
-        assert!(nr != DONE);
+    pub fn mark(&mut self, pick: u8) {
+        assert!(pick != DONE);
         for i in 0..SZ {
             for j in 0..SZ {
-                assert!(self.nrs[i][j] != DONE);
-                self.nrs[i][j] = DONE;
+                if self.nrs[i][j] == pick {
+                    assert!(self.nrs[i][j] != DONE);
+                    self.nrs[i][j] = DONE;
+                }
             }
         }
     }
@@ -87,12 +89,16 @@ impl Board {
 
 fn run() -> u32 {
     let lines = get_lines("data/2021/dec04.txt");
-    let picks = lines[0].split(",").map(|nr| nr.parse::<u8>()).collect::<Vec<_>>();
+    let picks = lines[0].split(",")
+        .map(|nr| nr.parse::<u8>().unwrap())
+        .collect::<Vec<_>>();
+
     let mut current = vec![];
+    let mut boards = vec![];
     for line in lines.iter().skip(2) {
         if line.is_empty() {
             assert!(!current.is_empty());
-            Board::new(current.clone());
+            boards.push(Board::new(current.clone()));
             current.clear();
             continue
         }
@@ -102,10 +108,19 @@ fn run() -> u32 {
         current.push(line_nrs)
     }
     if !current.is_empty() {
-        Board::new(current);
+        boards.push(Board::new(current));
     }
 
-    unimplemented!()
+    for pick in picks {
+        for board in &mut boards {
+            board.mark(pick);
+            if board.is_win() {
+                return board.remaining_score() * (pick as u32)
+            }
+        }
+    }
+
+    unreachable!()
 }
 
 fn get_lines(pth: &str) -> Vec<String> {
