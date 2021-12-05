@@ -27,7 +27,7 @@ struct Res {
 
 fn run() -> u64 {
     // Find id with highest total price
-    get_lines("data/2021/dec00.txt").into_iter()
+    get_lines("data/2021/dec05.txt").into_iter()
         .map(|line| {
             let groups = RE.captures(&line).unwrap();
             Res {

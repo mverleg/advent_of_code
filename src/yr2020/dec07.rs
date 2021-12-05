@@ -12,6 +12,7 @@ use ::nom::character::complete::{digit1, space1};
 use ::nom::character::complete::newline;
 use ::nom::character::streaming::alphanumeric1;
 use ::nom::combinator::{map, map_res};
+use ::nom::combinator::complete;
 use ::nom::combinator::opt;
 use ::nom::Err::Incomplete;
 use ::nom::error::{context, convert_error, VerboseError};
@@ -20,7 +21,6 @@ use ::nom::multi::many1;
 use ::nom::Needed::Size;
 use ::nom::sequence::{pair, separated_pair, tuple};
 use ::regex::Regex;
-use nom::combinator::complete;
 
 pub fn part_a() {
     let mut map = HashMap::<String, HashSet<String>>::new();
