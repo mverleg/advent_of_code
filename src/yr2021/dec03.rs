@@ -67,27 +67,22 @@ fn run2(keep_most_common: bool) -> u64 {
             }
         }
         let is_one_most_common = 2 * one_cnt >= (lines.len() as u64);
-        dbg!(is_one_most_common);
         lines = lines.iter()
             .filter(|line| {
                 let chrs = line.chars().collect::<Vec<_>>();
                 let is_currently_one = chrs[c] == '1';
-                eprintln!("{} {} {}", keep_most_common, is_one_most_common, is_currently_one);
                 match keep_most_common {
-                    true => is_one_most_common && is_currently_one,
-                    false => is_one_most_common && !is_currently_one,
+                    true => is_one_most_common == is_currently_one,
+                    false => is_one_most_common == !is_currently_one,
                 }
             })
             .map(|s| s.to_owned())
             .collect::<Vec<_>>();
-        dbg!(lines.len());
         if lines.len() == 1 {
             return u64::from_str_radix(&lines[0], 2).unwrap();
-            dbg!(&lines, keep_most_common);
         }
         assert!(!lines.is_empty());
     }
-    dbg!(lines.len());
     unimplemented!()
 }
 
