@@ -8,6 +8,6 @@ mod yr2020;
 mod yr2021;
 
 fn main() {
-    yr2021::dec03::part_a();
-    yr2021::dec03::part_b();
+    yr2021::dec04::part_a();
+    yr2021::dec04::part_b();
 }

@@ -5,10 +5,6 @@ use ::itertools::Itertools;
 use ::lazy_static::lazy_static;
 use ::regex::Regex;
 
-lazy_static! {
-    static ref RE: Regex = Regex::new(r"^([0-9]+)\s+([0-9]+)$").unwrap();
-}
-
 pub fn part_a() {
     let res = run1();
     println!("{}", res);
@@ -17,12 +13,6 @@ pub fn part_a() {
 pub fn part_b() {
     let res = run2(true) * run2(false);
     println!("{}", res);
-}
-
-#[derive(Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
-struct Res {
-    id: u32,
-    price: u32,
 }
 
 fn run1() -> u64 {
