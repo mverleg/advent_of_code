@@ -10,12 +10,12 @@ lazy_static! {
 }
 
 pub fn part_a() {
-    let res = run();
+    let res = run1();
     println!("{}", res);
 }
 
 pub fn part_b() {
-    let res = run();
+    let res = run2(true) * run2(false);
     println!("{}", res);
 }
 
@@ -25,13 +25,12 @@ struct Res {
     price: u32,
 }
 
-fn run() -> u64 {
+fn run1() -> u64 {
     let lines = get_lines("data/2021/dec03.txt");
+    let line_cnt = lines.len();
     let digit_cnt = lines[0].len();
     let mut one_cnts = vec![0u64; digit_cnt];
-    let mut line_cnt = 0;
     for line in lines {
-        line_cnt += 1;
         let chrs = line.chars().collect::<Vec<_>>();
         for c in 0 .. digit_cnt {
             if chrs[c] == '1' {
@@ -39,7 +38,6 @@ fn run() -> u64 {
             }
         }
     }
-    dbg!(&one_cnts);
     let mut gamma = String::with_capacity(digit_cnt);
     let mut epsilon = String::with_capacity(digit_cnt);
     for ones in one_cnts {
@@ -50,13 +48,47 @@ fn run() -> u64 {
             epsilon.push('1');
             gamma.push('0');
         }
-        println!("{} {} {:?} {:?}", ones, line_cnt, gamma, epsilon);
     }
-    dbg!(&gamma, &epsilon);
     let gam = u64::from_str_radix(&gamma, 2).unwrap();
     let eps = u64::from_str_radix(&epsilon, 2).unwrap();
-    dbg!(gam, eps);
     gam * eps
+}
+
+fn run2(keep_most_common: bool) -> u64 {
+    let mut lines = get_lines("data/2021/dec03.txt");
+    let digit_cnt = lines[0].len();
+    let mut one_cnts = vec![0u64; digit_cnt];
+    for c in 0 .. digit_cnt {
+        let mut one_cnt = 0;
+        for line in &lines {
+            let chrs = line.chars().collect::<Vec<_>>();
+            if chrs[c] == '1' {
+                one_cnt += 1
+            }
+        }
+        let is_one_most_common = 2 * one_cnt >= (lines.len() as u64);
+        dbg!(is_one_most_common);
+        lines = lines.iter()
+            .filter(|line| {
+                let chrs = line.chars().collect::<Vec<_>>();
+                let is_currently_one = chrs[c] == '1';
+                eprintln!("{} {} {}", keep_most_common, is_one_most_common, is_currently_one);
+                match keep_most_common {
+                    true => is_one_most_common && is_currently_one,
+                    false => is_one_most_common && !is_currently_one,
+                }
+            })
+            .map(|s| s.to_owned())
+            .collect::<Vec<_>>();
+        dbg!(lines.len());
+        if lines.len() == 1 {
+            return u64::from_str_radix(&lines[0], 2).unwrap();
+            dbg!(&lines, keep_most_common);
+        }
+        assert!(!lines.is_empty());
+    }
+    dbg!(lines.len());
+    unimplemented!()
 }
 
 fn get_lines(pth: &str) -> Vec<String> {
