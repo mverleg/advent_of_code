@@ -10,12 +10,12 @@ lazy_static! {
 }
 
 pub fn part_a() {
-    let res = run();
+    let res = run1();
     println!("{}", res);
 }
 
 pub fn part_b() {
-    let res = run();
+    let res = run2();
     println!("{}", res);
 }
 
@@ -87,7 +87,44 @@ impl Board {
     }
 }
 
-fn run() -> u32 {
+fn run1() -> u32 {
+    let (picks, mut boards) = load_boards();
+
+    for pick in picks {
+        for board in &mut boards {
+            board.mark(pick);
+            if board.is_win() {
+                return board.remaining_score() * (pick as u32)
+            }
+        }
+    }
+
+    unreachable!()
+}
+
+fn run2() -> u32 {
+    let (picks, mut boards) = load_boards();
+
+    for pick in picks {
+        let mut not_win_boards = vec![];
+        for mut board in boards {
+            board.mark(pick);
+            if board.is_win() {
+                // assumes there is only one last board, i.e. not two winning in the same round
+                if boards.len() == 1 {
+                    return board.remaining_score() * (pick as u32)
+                }
+                continue;
+            }
+            not_win_boards.push(board);
+        }
+        boards = not_win_boards;
+    }
+
+    unreachable!()
+}
+
+fn load_boards() -> (Vec<u8>, Vec<Board>) {
     let lines = get_lines("data/2021/dec04.txt");
     let picks = lines[0].split(",")
         .map(|nr| nr.parse::<u8>().unwrap())
@@ -110,17 +147,7 @@ fn run() -> u32 {
     if !current.is_empty() {
         boards.push(Board::new(current));
     }
-
-    for pick in picks {
-        for board in &mut boards {
-            board.mark(pick);
-            if board.is_win() {
-                return board.remaining_score() * (pick as u32)
-            }
-        }
-    }
-
-    unreachable!()
+    (picks, boards)
 }
 
 fn get_lines(pth: &str) -> Vec<String> {
