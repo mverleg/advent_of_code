@@ -26,24 +26,37 @@ struct Res {
 }
 
 fn run() -> u64 {
-    // Find id with highest total price
-    get_lines("data/2021/dec03.txt").into_iter()
-        .map(|line| {
-            let groups = RE.captures(&line).unwrap();
-            Res {
-                id: groups[1].parse().unwrap(),
-                price: groups[2].parse().unwrap(),
+    let lines = get_lines("data/2021/dec03.txt");
+    let digit_cnt = lines[0].len();
+    let mut one_cnts = vec![0u64; digit_cnt];
+    let mut line_cnt = 0;
+    for line in lines {
+        line_cnt += 1;
+        let chrs = line.chars().collect::<Vec<_>>();
+        for c in 0 .. digit_cnt {
+            if chrs[c] == '1' {
+                one_cnts[c] += 1
             }
-        })
-        .into_group_map_by(|res| res.id)
-        .into_iter()
-        .map(|(k, v)| Res { id: k, price: v.iter().map(|res| res.price).sum() })
-        .inspect(|res| println!("item {} total price {}", res.id, res.price))
-        .sorted_by_key(|res| res.price)
-        .rev()
-        .find(|res| true)
-        .unwrap()
-        .id as u64
+        }
+    }
+    dbg!(&one_cnts);
+    let mut gamma = String::with_capacity(digit_cnt);
+    let mut epsilon = String::with_capacity(digit_cnt);
+    for ones in one_cnts {
+        if 2 * ones > (line_cnt as u64) {
+            gamma.push('1');
+            epsilon.push('0');
+        } else {
+            epsilon.push('1');
+            gamma.push('0');
+        }
+        println!("{} {} {:?} {:?}", ones, line_cnt, gamma, epsilon);
+    }
+    dbg!(&gamma, &epsilon);
+    let gam = u64::from_str_radix(&gamma, 2).unwrap();
+    let eps = u64::from_str_radix(&epsilon, 2).unwrap();
+    dbg!(gam, eps);
+    gam * eps
 }
 
 fn get_lines(pth: &str) -> Vec<String> {
