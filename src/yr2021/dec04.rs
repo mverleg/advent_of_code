@@ -19,37 +19,99 @@ pub fn part_b() {
     println!("{}", res);
 }
 
+const SZ: usize = 5;
+const DONE: u8 = u8::MAX;
+
 #[derive(Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
-struct Res {
-    id: u32,
-    price: u32,
+struct Board {
+    nrs: Vec<Vec<u8>>,
 }
 
-fn run() -> u64 {
-    get_lines("data/2021/dec04.txt").into_iter()
-        .map(|line| {
-            let groups = RE.captures(&line).unwrap();
-            Res {
-                id: groups[1].parse().unwrap(),
-                price: groups[2].parse().unwrap(),
+impl Board {
+    pub fn new(nrs: Vec<Vec<u8>>) -> Self {
+        Board { nrs }
+    }
+
+    pub fn mark(&mut self, nr: u8) {
+        assert!(nr != DONE);
+        for i in 0..SZ {
+            for j in 0..SZ {
+                assert!(self.nrs[i][j] != DONE);
+                self.nrs[i][j] = DONE;
             }
-        })
-        .into_group_map_by(|res| res.id)
-        .into_iter()
-        .map(|(k, v)| Res { id: k, price: v.iter().map(|res| res.price).sum() })
-        .inspect(|res| println!("item {} total price {}", res.id, res.price))
-        .sorted_by_key(|res| res.price)
-        .rev()
-        .find(|res| true)
-        .unwrap()
-        .id as u64
+        }
+    }
+
+    pub fn is_win(&self) -> bool {
+        for i in 0..SZ {
+            let mut all = true;
+            for j in 0..SZ {
+                if self.nrs[i][j] != DONE {
+                    all = false;
+                    break;
+                }
+            }
+            if all {
+                return true;
+            }
+        }
+
+        for j in 0..SZ {
+            let mut all = true;
+            for i in 0..SZ {
+                if self.nrs[i][j] != DONE {
+                    all = false;
+                    break;
+                }
+            }
+            if all {
+                return true;
+            }
+        }
+
+        false
+    }
+
+    pub fn remaining_score(&self) -> u32 {
+        let mut score: u32 = 0;
+        for i in 0..SZ {
+            for j in 0..SZ {
+                if self.nrs[i][j] != DONE {
+                    score += self.nrs[i][j] as u32;
+                }
+            }
+        }
+        score
+    }
+}
+
+fn run() -> u32 {
+    let lines = get_lines("data/2021/dec04.txt");
+    let picks = lines[0].split(",").map(|nr| nr.parse::<u8>()).collect::<Vec<_>>();
+    let mut current = vec![];
+    for line in lines.iter().skip(2) {
+        if line.is_empty() {
+            assert!(!current.is_empty());
+            Board::new(current.clone());
+            current.clear();
+            continue
+        }
+        let line_nrs = line.split_ascii_whitespace()
+            .map(|cell| cell.parse::<u8>().unwrap())
+            .collect::<Vec<_>>();
+        current.push(line_nrs)
+    }
+    if !current.is_empty() {
+        Board::new(current);
+    }
+
+    unimplemented!()
 }
 
 fn get_lines(pth: &str) -> Vec<String> {
     let content = read_to_string(pth).unwrap();
     content
         .lines()
-        .filter(|ln| !ln.trim().is_empty())
         .map(|ln| ln.to_owned())
         .collect::<Vec<_>>()
 }
