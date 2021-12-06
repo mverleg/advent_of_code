@@ -13,7 +13,7 @@ const INIT: u64 = 9;
 const CYCLE: u64 = 7;
 
 pub fn part_a() {
-    let res = run(20);
+    let res = run(80);
     println!("{}", res);
 }
 
