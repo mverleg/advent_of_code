@@ -62,7 +62,7 @@ fn build_grid(lines: Vec<Res>) -> Vec<Vec<usize>> {
             unimplemented!()
         }
         if line.x1 == line.x2 {
-            for y in min(line.y1, line.y2) ..= max(line.y2, line.y2) {
+            for y in min(line.y1, line.y2) ..= max(line.y1, line.y2) {
                 grid[line.x1][y] += 1
             }
         } else if line.y1 == line.y2 {
