@@ -70,8 +70,13 @@ fn build_grid(lines: Vec<Res>) -> Vec<Vec<usize>> {
                 grid[x][line.y1] += 1
             }
         } else {
-            // Skip for part a
-            continue
+            assert_eq!(max(line.x1, line.x2) - min(line.x1, line.x2), max(line.y1, line.y2) - min(line.y1, line.y2), "not diagonal");
+            let dx: i32 = if line.x1 > line.x2 { -1 } else { 1 };
+            let dy: i32 = if line.y1 > line.y2 { -1 } else { 1 };
+            let range = (max(line.x1, line.x2) - min(line.x1, line.x2)) as i32;
+            for i in 0 ..= range {
+                grid[(line.x1 as i32 + (dx * i)) as usize][(line.y1 as i32 + (dy * i)) as usize] += 1
+            }
         }
     }
 
