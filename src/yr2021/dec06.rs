@@ -9,11 +9,11 @@ lazy_static! {
     static ref RE: Regex = Regex::new(r"^([0-9]+)\s+([0-9]+)$").unwrap();
 }
 
-const INIT: u64 = 8;
+const INIT: u64 = 9;
 const CYCLE: u64 = 7;
 
 pub fn part_a() {
-    let res = run(18);
+    let res = run(20);
     println!("{}", res);
 }
 
@@ -31,32 +31,27 @@ struct Res {
 fn run(remaining: u64) -> u64 {
     get_lines("data/2021/dec06.txt")[0].split(",")
         .map(|nr| nr.parse::<u64>().unwrap())
-        .map(|nr| end_count(nr, remaining))
+        .map(|nr| end_count(nr, remaining, "init"))
         .sum()
 }
 
-fn end_count(day: u64, remaining: u64) -> u64 {
-    // if day < CYCLE {
-    //     eprintln!("at day {} with {} rem, will not spawn", day, remaining);
-    //     return 1;
-    // }
-    eprintln!("for day {} with {} rem",
-              day, remaining);
+fn end_count(day: u64, remaining: u64, msg: &str) -> u64 {
+    let msg = format!("{} -> {} / {}", msg, day, remaining);
+    eprintln!("{}", msg);
     if day > remaining {
-        return 1
-    }
-    let mut spawn_at = (remaining - day) % CYCLE;
-    let mut sum = 1;  // self
-    //eprintln!("i={} day={} rem={} sum={}", i, day, remaining, sum);
-    while spawn_at + day <= remaining {
-        eprintln!("  at {} will spawn day {} rem {}-{}={} (a.o.)",
-                  spawn_at, INIT, remaining, spawn_at, remaining - spawn_at);
-        //eprintln!("spawn: {} / {}", i, remaining);
-        if spawn_at < INIT {
-            sum += 1
+        return if remaining > 0 {
+            1
         } else {
-            sum += end_count(INIT, spawn_at);
+            // do not count the current fish in last iteration,
+            // because I am spawning them one round early.
+            0
         }
+    }
+
+    let mut spawn_at = (remaining - day) % CYCLE;
+    let mut sum = 1;  // current
+    while spawn_at + day <= remaining {
+        sum += end_count(INIT, spawn_at, &msg);
         spawn_at += CYCLE;
     }
     sum
@@ -64,47 +59,65 @@ fn end_count(day: u64, remaining: u64) -> u64 {
 
 #[test]
 fn test1() {
-    assert_eq!(end_count(5, 3), 1);
+    assert_eq!(end_count(5, 3, "test"), 1);
 }
 
 #[test]
 fn test2() {
-    assert_eq!(end_count(1, 5), 2);
+    assert_eq!(end_count(1, 5, "test"), 2);
 }
 
 #[test]
 fn test3() {
-    assert_eq!(end_count(1, 11), 4);
+    assert_eq!(end_count(1, 11, "test"), 4);
 }
 
-#[test]
-fn test4() {
-    assert_eq!(end_count(4, 18), 5);
-}
+
 
 #[test]
 fn test5() {
-    assert_eq!(end_count(3, 18), 7);
+    assert_eq!(end_count(3, 18, "test"), 7);
 }
 
 #[test]
 fn test6() {
-    assert_eq!(end_count(0, 1), 2);
+    assert_eq!(end_count(0, 1, "test"), 2);
 }
 
 #[test]
 fn test7() {
-    assert_eq!(end_count(1, 1), 1);
+    assert_eq!(end_count(1, 1, "test"), 2);
 }
 
 #[test]
 fn test8() {
-    assert_eq!(end_count(0, 0), 1);
+    assert_eq!(end_count(0, 0, "test"), 2);
 }
 
 #[test]
 fn test9() {
-    assert_eq!(end_count(0, 46), 7);
+    //TODO: verify answer
+    assert_eq!(end_count(0, 46, "test"), 121);
+}
+
+#[test]
+fn test_pzzl1() {
+    assert_eq!(end_count(1, 18, "test"), 8);
+}
+
+#[test]
+fn test_pzzl2() {
+    assert_eq!(end_count(2, 18, "test"), 8);
+}
+
+#[test]
+fn test_pzzl3() {
+    assert_eq!(end_count(3, 18, "test"), 7);
+}
+
+#[test]
+fn test_pzzl4() {
+    assert_eq!(end_count(4, 18, "test"), 5);
 }
 
 fn get_lines(pth: &str) -> Vec<String> {
