@@ -9,8 +9,8 @@ lazy_static! {
     static ref RE: Regex = Regex::new(r"^([0-9]+)\s+([0-9]+)$").unwrap();
 }
 
-const INIT: u64 = 6;
-const CYCLE: u64 = 8;
+const INIT: u64 = 9;
+const CYCLE: u64 = 7;
 
 pub fn part_a() {
     let res = run(18);
@@ -18,7 +18,7 @@ pub fn part_a() {
 }
 
 pub fn part_b() {
-    let res = run(18);
+    let res = run(2);
     println!("{}", res);
 }
 
@@ -33,36 +33,62 @@ fn run(remaining: u64) -> u64 {
         .map(|nr| nr.parse::<u64>().unwrap())
         .map(|nr| end_count(nr, remaining))
         .sum()
-
 }
 
 fn end_count(day: u64, remaining: u64) -> u64 {
     if day > remaining {
-        return 1
+        return 1;
     }
-    let mut i = remaining - day;
+    let mut spawn_at = remaining - day;
     let mut sum = 1;  // self
-    eprintln!("i={} day={} rem={} sum={}", i, day, remaining, sum);
+    //eprintln!("i={} day={} rem={} sum={}", i, day, remaining, sum);
     loop {
-        eprintln!("spawn: {} / {}", i, remaining);
-        sum += end_count(CYCLE, i);
-        if i > INIT {
-            i -= INIT;
+        eprintln!("at day {} with {} rem, will spawn at {} (a.o.)", day, remaining, spawn_at);
+        //eprintln!("spawn: {} / {}", i, remaining);
+        sum += end_count(INIT, spawn_at);
+        if spawn_at > CYCLE {
+            spawn_at -= CYCLE;
         } else {
-            break
+            break;
         }
     }
     sum
 }
 
 #[test]
-fn end_count_test() {
+fn test1() {
     assert_eq!(end_count(5, 3), 1);
+}
+
+#[test]
+fn test2() {
     assert_eq!(end_count(1, 5), 2);
+}
+
+#[test]
+fn test3() {
     assert_eq!(end_count(1, 11), 4);
+}
+
+#[test]
+fn test4() {
     assert_eq!(end_count(3, 18), 7);
 }
 
+#[test]
+fn test5() {
+    assert_eq!(end_count(0, 1), 2);
+}
+
+#[test]
+fn test6() {
+    assert_eq!(end_count(1, 1), 1);
+}
+
+#[test]
+fn test7() {
+    assert_eq!(end_count(0, 0), 1);
+}
 
 fn get_lines(pth: &str) -> Vec<String> {
     let content = read_to_string(pth).unwrap();
