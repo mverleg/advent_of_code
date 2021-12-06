@@ -53,17 +53,17 @@ fn run() -> u64 {
     count as u64
 }
 
-fn build_grid(lines: Vec<Res>) -> Vec<Vec<u8>> {
+fn build_grid(lines: Vec<Res>) -> Vec<Vec<usize>> {
     let x_max = lines.iter().map(|res| max(res.x1, res.x2)).max().unwrap() + 1;
     let y_max = lines.iter().map(|res| max(res.y1, res.y2)).max().unwrap() + 1;
-    let mut grid = vec![vec![0u8; y_max]; x_max];
+    let mut grid = vec![vec![0usize; y_max]; x_max];
     for line in lines {
         if line.x1 == line.x2 {
-            for y in min(line.y1, line.y2)..max(line.y2, line.y2) {
+            for y in min(line.y1, line.y2)..max(line.y2, line.y2) + 1 {
                 grid[line.x1][y] += 1
             }
         } else if line.y1 == line.y2 {
-            for x in min(line.x1, line.x2)..max(line.x1, line.x2) {
+            for x in min(line.x1, line.x2)..max(line.x1, line.x2) + 1 {
                 grid[x][line.y1] += 1
             }
         } else {
@@ -71,6 +71,13 @@ fn build_grid(lines: Vec<Res>) -> Vec<Vec<u8>> {
             continue
         }
     }
+
+    // for y in 0 .. y_max {
+    //     for x in 0 .. x_max {
+    //         print!("{} ", grid[x][y]);
+    //     }
+    //     println!(";")
+    // }
     grid
 }
 
