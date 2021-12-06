@@ -41,7 +41,7 @@ fn run() -> u64 {
 
     let grid = build_grid(lines);
 
-    let mut count = 0;
+    let mut count: u64 = 0;
     for row in grid {
         for cell in row {
             if cell > 1 {
@@ -50,7 +50,7 @@ fn run() -> u64 {
         }
     }
 
-    count as u64
+    count
 }
 
 fn build_grid(lines: Vec<Res>) -> Vec<Vec<usize>> {
@@ -71,18 +71,26 @@ fn build_grid(lines: Vec<Res>) -> Vec<Vec<usize>> {
             }
         } else {
             // Skip for part a
-            eprintln!("skip line {:?}", line);
             continue
         }
     }
 
-    for y in 0 .. y_max {
-        for x in 0 .. x_max {
-            print!("{} ", grid[x][y]);
+    print_grid(&grid);
+
+    grid
+}
+
+fn print_grid(grid: &[Vec<usize>]) {
+    for y in 0..grid.len() {
+        for x in 0..grid[y].len() {
+            if grid[x][y] != 0 {
+                print!("{}", grid[x][y]);
+            } else {
+                print!(".");
+            }
         }
         println!(";")
     }
-    grid
 }
 
 fn parse_line(line: &str) -> Res {
