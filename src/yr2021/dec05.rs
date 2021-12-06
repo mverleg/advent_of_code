@@ -7,6 +7,8 @@ use ::regex::Regex;
 use nom::bytes::complete::tag;
 use nom::character::complete::digit1;
 use nom::combinator::map;
+use nom::error::VerboseError;
+use nom::IResult;
 use nom::sequence::tuple;
 
 lazy_static! {
@@ -35,19 +37,21 @@ fn run() -> u64 {
     // Find id with highest total price
 
     get_lines("data/2021/dec05.txt").into_iter()
-        .map(|line| parse_line);
+        .map(|line| parse_line(&line));
 
     unimplemented!()
 }
 
 fn parse_line(line: &str) -> Res {
-    map(tuple((digit1, tag(","), digit1, tag(" -> "), digit1, tag(","), digit1)),
+    let mut parser = map(tuple((digit1, tag(","), digit1, tag(" -> "), digit1, tag(","), digit1)),
         |(x1, _, y1, _, x2, _, y2): (&str, &str, &str, &str, &str, &str, &str)| Res {
             x1: x1.parse::<u32>().unwrap(),
             y1: y1.parse::<u32>().unwrap(),
             x2: x2.parse::<u32>().unwrap(),
             y2: y2.parse::<u32>().unwrap()
-        })(line).unwrap().1
+        });
+    let res: IResult<&str, Res, VerboseError<&str>> = parser(line);
+    res.unwrap().1
 }
 
 fn get_lines(pth: &str) -> Vec<String> {
