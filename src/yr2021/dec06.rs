@@ -9,7 +9,7 @@ lazy_static! {
     static ref RE: Regex = Regex::new(r"^([0-9]+)\s+([0-9]+)$").unwrap();
 }
 
-const INIT: u64 = 9;
+const INIT: u64 = 8;
 const CYCLE: u64 = 7;
 
 pub fn part_a() {
@@ -40,18 +40,23 @@ fn end_count(day: u64, remaining: u64) -> u64 {
     //     eprintln!("at day {} with {} rem, will not spawn", day, remaining);
     //     return 1;
     // }
+    eprintln!("for day {} with {} rem",
+              day, remaining);
     if day > remaining {
         return 1
     }
     let mut spawn_at = (remaining - day) % CYCLE;
     let mut sum = 1;  // self
     //eprintln!("i={} day={} rem={} sum={}", i, day, remaining, sum);
-    while spawn_at <= remaining {
-        eprintln!("at day {} (init {}) with {} rem, will spawn day {} rem {}-{}={} (a.o.)",
-                  spawn_at, day, remaining,
-                  INIT, remaining, spawn_at, remaining - spawn_at);
+    while spawn_at + day <= remaining {
+        eprintln!("  at {} will spawn day {} rem {}-{}={} (a.o.)",
+                  spawn_at, INIT, remaining, spawn_at, remaining - spawn_at);
         //eprintln!("spawn: {} / {}", i, remaining);
-        sum += end_count(INIT, remaining - spawn_at);
+        if spawn_at < INIT {
+            sum += 1
+        } else {
+            sum += end_count(INIT, spawn_at);
+        }
         spawn_at += CYCLE;
     }
     sum
