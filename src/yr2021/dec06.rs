@@ -18,8 +18,8 @@ pub fn part_a() {
 }
 
 pub fn part_b() {
-    let res = run(2);
-    println!("{}", res);
+    // let res = run(18);
+    // println!("{}", res);
 }
 
 #[derive(Debug, Hash, PartialEq, Eq, PartialOrd, Ord, Clone)]
@@ -36,21 +36,23 @@ fn run(remaining: u64) -> u64 {
 }
 
 fn end_count(day: u64, remaining: u64) -> u64 {
+    // if day < CYCLE {
+    //     eprintln!("at day {} with {} rem, will not spawn", day, remaining);
+    //     return 1;
+    // }
     if day > remaining {
-        return 1;
+        return 1
     }
-    let mut spawn_at = remaining - day;
+    let mut spawn_at = (remaining - day) % CYCLE;
     let mut sum = 1;  // self
     //eprintln!("i={} day={} rem={} sum={}", i, day, remaining, sum);
-    loop {
-        eprintln!("at day {} with {} rem, will spawn at {} (a.o.)", day, remaining, spawn_at);
+    while spawn_at <= remaining {
+        eprintln!("at day {} (init {}) with {} rem, will spawn day {} rem {}-{}={} (a.o.)",
+                  spawn_at, day, remaining,
+                  INIT, remaining, spawn_at, remaining - spawn_at);
         //eprintln!("spawn: {} / {}", i, remaining);
-        sum += end_count(INIT, spawn_at);
-        if spawn_at > CYCLE {
-            spawn_at -= CYCLE;
-        } else {
-            break;
-        }
+        sum += end_count(INIT, remaining - spawn_at);
+        spawn_at += CYCLE;
     }
     sum
 }
@@ -72,22 +74,32 @@ fn test3() {
 
 #[test]
 fn test4() {
-    assert_eq!(end_count(3, 18), 7);
+    assert_eq!(end_count(4, 18), 5);
 }
 
 #[test]
 fn test5() {
-    assert_eq!(end_count(0, 1), 2);
+    assert_eq!(end_count(3, 18), 7);
 }
 
 #[test]
 fn test6() {
-    assert_eq!(end_count(1, 1), 1);
+    assert_eq!(end_count(0, 1), 2);
 }
 
 #[test]
 fn test7() {
+    assert_eq!(end_count(1, 1), 1);
+}
+
+#[test]
+fn test8() {
     assert_eq!(end_count(0, 0), 1);
+}
+
+#[test]
+fn test9() {
+    assert_eq!(end_count(0, 46), 7);
 }
 
 fn get_lines(pth: &str) -> Vec<String> {
