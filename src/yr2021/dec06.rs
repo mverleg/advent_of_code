@@ -72,13 +72,6 @@ fn test3() {
     assert_eq!(end_count(1, 11, "test"), 4);
 }
 
-
-
-#[test]
-fn test5() {
-    assert_eq!(end_count(3, 18, "test"), 7);
-}
-
 #[test]
 fn test6() {
     assert_eq!(end_count(0, 1, "test"), 2);
@@ -86,38 +79,40 @@ fn test6() {
 
 #[test]
 fn test7() {
-    assert_eq!(end_count(1, 1, "test"), 2);
+    // new spawns only count next round (when current fish resets back to 6)
+    assert_eq!(end_count(1, 1, "test"), 1);
 }
 
 #[test]
 fn test8() {
-    assert_eq!(end_count(0, 0, "test"), 2);
+    // new spawns only count next round (when current fish resets back to 6)
+    assert_eq!(end_count(0, 0, "test"), 1);
 }
 
 #[test]
 fn test9() {
     //TODO: verify answer
-    assert_eq!(end_count(0, 46, "test"), 121);
+    assert_eq!(end_count(0, 46, "test"), 71);
 }
 
 #[test]
 fn test_pzzl1() {
-    assert_eq!(end_count(1, 18, "test"), 8);
+    assert_eq!(end_count(1, 18, "test"), 7);
 }
 
 #[test]
 fn test_pzzl2() {
-    assert_eq!(end_count(2, 18, "test"), 8);
+    assert_eq!(end_count(2, 18, "test"), 5);
 }
 
 #[test]
 fn test_pzzl3() {
-    assert_eq!(end_count(3, 18, "test"), 7);
+    assert_eq!(end_count(3, 18, "test"), 5);
 }
 
 #[test]
 fn test_pzzl4() {
-    assert_eq!(end_count(4, 18, "test"), 5);
+    assert_eq!(end_count(4, 18, "test"), 4);
 }
 
 fn get_lines(pth: &str) -> Vec<String> {
