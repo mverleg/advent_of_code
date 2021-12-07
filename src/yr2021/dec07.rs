@@ -10,22 +10,17 @@ lazy_static! {
 }
 
 pub fn part_a() {
-    let res = run();
+    let res = run1();
     println!("{}", res);
 }
 
 pub fn part_b() {
-    let res = run();
+    let res = run2();
     println!("{}", res);
 }
 
-fn run() -> i64 {
-    let poss = get_lines("data/2021/dec07.txt")
-        [0].split(",")
-        //.inspect(|nr| eprintln!(">> {}", nr))
-        .map(|nr| nr.parse::<i64>().unwrap())
-        .sorted()
-        .collect::<Vec<_>>();
+fn run1() -> i64 {
+    let poss = load_nrs();
 
     //let target = ((poss.iter().sum::<i64>() as f64) / (poss.len() as f64)).round() as i64;
     let target = poss[poss.len() / 2];
@@ -37,6 +32,31 @@ fn run() -> i64 {
     // dbg!(cost);
 
     cost
+}
+
+fn run2() -> i64 {
+    let poss = load_nrs();
+
+    //let target = ((poss.iter().sum::<i64>() as f64) / (poss.len() as f64)).round() as i64;
+    let target = poss[poss.len() / 2];
+    // dbg!(target);
+
+    let cost = poss.iter()
+        .map(|nr| (nr - target).abs())
+        .sum::<i64>();
+    // dbg!(cost);
+
+    cost
+}
+
+fn load_nrs() -> Vec<i64> {
+    let poss = get_lines("data/2021/dec07.txt")
+        [0].split(",")
+        //.inspect(|nr| eprintln!(">> {}", nr))
+        .map(|nr| nr.parse::<i64>().unwrap())
+        .sorted()
+        .collect::<Vec<_>>();
+    poss
 }
 
 fn get_lines(pth: &str) -> Vec<String> {
