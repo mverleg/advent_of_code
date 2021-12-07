@@ -38,10 +38,11 @@ fn run2() -> i64 {
     // assumes no local minima, which I think is true
     let poss = load_nrs();
 
-    let mut target = poss[poss.len() / 2];
-
     let min_cost = (poss[0] .. poss[poss.len() - 1])
-        .min_by_key(|p| cost_new(&poss, target))
+        .inspect(|c| eprintln!("> {}", c))
+        .map(|target| cost_new(&poss, target))
+        .inspect(|c| eprintln!("  = {}", c))
+        .min()
         .unwrap();
 
     min_cost
@@ -49,7 +50,12 @@ fn run2() -> i64 {
 
 fn cost_new(poss: &[i64], mut target: i64) -> i64 {
     poss.iter()
-        .map(|nr| (nr - target) * (1 + nr - target) / 2)
+        .inspect(|nr| eprint!("    ({} - {}) * (1 + {} - {}) / 2 -> ", nr, target, nr, target))
+        .map(|nr| {
+            let dif = (nr - target).abs();
+            dif * (dif + 1) / 2
+        })
+        .inspect(|c| eprintln!("{}", c))
         .sum::<i64>()
 }
 
