@@ -35,18 +35,22 @@ fn run1() -> i64 {
 }
 
 fn run2() -> i64 {
+    // assumes no local minima, which I think is true
     let poss = load_nrs();
 
-    //let target = ((poss.iter().sum::<i64>() as f64) / (poss.len() as f64)).round() as i64;
-    let target = poss[poss.len() / 2];
-    // dbg!(target);
+    let mut target = poss[poss.len() / 2];
 
-    let cost = poss.iter()
-        .map(|nr| (nr - target).abs())
-        .sum::<i64>();
-    // dbg!(cost);
+    let min_cost = (poss[0] .. poss[poss.len() - 1])
+        .min_by_key(|p| cost_new(&poss, target))
+        .unwrap();
 
-    cost
+    min_cost
+}
+
+fn cost_new(poss: &[i64], mut target: i64) -> i64 {
+    poss.iter()
+        .map(|nr| (nr - target) * (1 + nr - target) / 2)
+        .sum::<i64>()
 }
 
 fn load_nrs() -> Vec<i64> {
