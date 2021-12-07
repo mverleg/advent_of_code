@@ -2,12 +2,6 @@ use ::std::collections::HashMap;
 use ::std::fs::read_to_string;
 
 use ::itertools::Itertools;
-use ::lazy_static::lazy_static;
-use ::regex::Regex;
-
-lazy_static! {
-    static ref RE: Regex = Regex::new(r"^([0-9]+)\s+([0-9]+)$").unwrap();
-}
 
 pub fn part_a() {
     let res = run1();
@@ -22,14 +16,11 @@ pub fn part_b() {
 fn run1() -> i64 {
     let poss = load_nrs();
 
-    //let target = ((poss.iter().sum::<i64>() as f64) / (poss.len() as f64)).round() as i64;
     let target = poss[poss.len() / 2];
-    // dbg!(target);
 
     let cost = poss.iter()
         .map(|nr| (nr - target).abs())
         .sum::<i64>();
-    // dbg!(cost);
 
     cost
 }
@@ -39,9 +30,9 @@ fn run2() -> i64 {
     let poss = load_nrs();
 
     let min_cost = (poss[0] .. poss[poss.len() - 1])
-        .inspect(|c| eprintln!("> {}", c))
+        // .inspect(|c| eprintln!("> {}", c))
         .map(|target| cost_new(&poss, target))
-        .inspect(|c| eprintln!("  = {}", c))
+        // .inspect(|c| eprintln!("  = {}", c))
         .min()
         .unwrap();
 
@@ -50,12 +41,12 @@ fn run2() -> i64 {
 
 fn cost_new(poss: &[i64], mut target: i64) -> i64 {
     poss.iter()
-        .inspect(|nr| eprint!("    ({} - {}) * (1 + {} - {}) / 2 -> ", nr, target, nr, target))
+        // .inspect(|nr| eprint!("    ({} - {}) * (1 + {} - {}) / 2 -> ", nr, target, nr, target))
         .map(|nr| {
             let dif = (nr - target).abs();
             dif * (dif + 1) / 2
         })
-        .inspect(|c| eprintln!("{}", c))
+        // .inspect(|c| eprintln!("{}", c))
         .sum::<i64>()
 }
 
