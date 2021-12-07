@@ -2,8 +2,6 @@
 #![allow(unused)]
 
 mod template;
-mod ast;
-mod parse;
 mod yr2020;
 mod yr2021;
 
