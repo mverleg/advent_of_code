@@ -1,37 +1,21 @@
 use ::std::collections::HashMap;
 use ::std::fs::read_to_string;
-use std::collections::HashSet;
+use ::std::collections::HashSet;
 
 use ::itertools::Itertools;
-use ::lazy_static::lazy_static;
-use ::regex::Regex;
-
-lazy_static! {
-    static ref RE: Regex = Regex::new(r"^([0-9]+)\s+([0-9]+)$").unwrap();
-}
 
 pub fn part_a() {
-    let res = run();
+    let res = run1();
     println!("{}", res);
 }
 
 pub fn part_b() {
-    let res = run();
+    let res = run2();
     println!("{}", res);
 }
 
-#[derive(Debug, Hash, PartialEq, Eq, PartialOrd, Ord, Clone)]
-struct Res {
-    id: u32,
-    price: u32,
-}
-
-fn run() -> u64 {
-    let inps = get_lines("data/2021/dec08.txt").iter()
-        .map(|line| line.split_once(" | ").unwrap())
-        .map(|(ptrns, outp)| (space_sep_ints(ptrns), space_sep_ints(outp)))
-        .collect::<Vec<_>>();
-    inps.iter()
+fn run1() -> u64 {
+    parse_input().iter()
         .map(|(_, outp)| outp)
         .map(|outp| outp.iter()
             .map(|word| word.len())
@@ -40,9 +24,26 @@ fn run() -> u64 {
         .sum::<usize>() as u64
 }
 
+fn run2() -> u64 {
+    parse_input().iter()
+        .map(|(_, outp)| outp)
+        .map(|outp| outp.iter()
+            .map(|word| word.len())
+            .filter(|len| len <= &4 || len == &7)
+            .count())
+        .sum::<usize>() as u64
+}
+
+fn parse_input() -> Vec<(Vec<HashSet<char>>, Vec<HashSet<char>>)> {
+    let inps = get_lines("data/2021/dec08.txt").iter()
+        .map(|line| line.split_once(" | ").unwrap())
+        .map(|(ptrns, outp)| (space_sep_ints(ptrns), space_sep_ints(outp)))
+        .collect::<Vec<_>>();
+    inps
+}
+
 fn space_sep_ints(txt: &str) -> Vec<HashSet<char>> {
     txt.split(" ")
-        .inspect(|nr| eprintln!("{}", nr))
         .map(|word| word.chars().collect::<HashSet<_>>())
         .collect()
 }
