@@ -31,8 +31,13 @@ fn run() -> u64 {
         .map(|line| line.split_once(" | ").unwrap())
         .map(|(ptrns, outp)| (space_sep_ints(ptrns), space_sep_ints(outp)))
         .collect::<Vec<_>>();
-
-    unimplemented!()
+    inps.iter()
+        .map(|(_, outp)| outp)
+        .map(|outp| outp.iter()
+            .map(|word| word.len())
+            .filter(|len| len <= &4 || len == &7)
+            .count())
+        .sum::<usize>() as u64
 }
 
 fn space_sep_ints(txt: &str) -> Vec<HashSet<char>> {
