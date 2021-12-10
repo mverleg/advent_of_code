@@ -1,5 +1,6 @@
 use ::std::collections::HashMap;
 use ::std::fs::read_to_string;
+use std::collections::HashSet;
 
 use ::itertools::Itertools;
 use ::lazy_static::lazy_static;
@@ -26,23 +27,19 @@ struct Res {
 }
 
 fn run() -> u64 {
-    get_lines("data/2021/dec08.txt").into_iter()
-        .map(|line| {
-            let groups = RE.captures(&line).unwrap();
-            Res {
-                id: groups[1].parse().unwrap(),
-                price: groups[2].parse().unwrap(),
-            }
-        })
-        .into_group_map_by(|res| res.id)
-        .into_iter()
-        .map(|(k, v)| Res { id: k, price: v.iter().map(|res| res.price).sum() })
-        .inspect(|res| println!("item {} total price {}", res.id, res.price))
-        .sorted_by_key(|res| res.price)
-        .rev()
-        .find(|res| true)
-        .unwrap()
-        .id as u64
+    let inps = get_lines("data/2021/dec08.txt").iter()
+        .map(|line| line.split_once(" | ").unwrap())
+        .map(|(ptrns, outp)| (space_sep_ints(ptrns), space_sep_ints(outp)))
+        .collect::<Vec<_>>();
+
+    unimplemented!()
+}
+
+fn space_sep_ints(txt: &str) -> Vec<HashSet<char>> {
+    txt.split(" ")
+        .inspect(|nr| eprintln!("{}", nr))
+        .map(|word| word.chars().collect::<HashSet<_>>())
+        .collect()
 }
 
 fn get_lines(pth: &str) -> Vec<String> {
