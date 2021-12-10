@@ -30,9 +30,7 @@ fn run2() -> i64 {
     let poss = load_nrs();
 
     let min_cost = (poss[0] .. poss[poss.len() - 1])
-        // .inspect(|c| eprintln!("> {}", c))
         .map(|target| cost_new(&poss, target))
-        // .inspect(|c| eprintln!("  = {}", c))
         .min()
         .unwrap();
 
@@ -41,12 +39,7 @@ fn run2() -> i64 {
 
 fn cost_new(poss: &[i64], mut target: i64) -> i64 {
     poss.iter()
-        // .inspect(|nr| eprint!("    ({} - {}) * (1 + {} - {}) / 2 -> ", nr, target, nr, target))
-        .map(|nr| {
-            let dif = (nr - target).abs();
-            dif * (dif + 1) / 2
-        })
-        // .inspect(|c| eprintln!("{}", c))
+        .map(|nr| (nr - target).abs() * ((nr - target).abs() + 1) / 2)
         .sum::<i64>()
 }
 
