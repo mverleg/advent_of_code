@@ -1,4 +1,5 @@
 use ::std::collections::HashMap;
+use ::std::fmt;
 use ::std::fs::read_to_string;
 
 use ::itertools::Itertools;
@@ -26,6 +27,7 @@ fn run1() -> u64 {
 fn run2() -> u64 {
     parse_input().iter()
         .map(|(ptrns, outp)| row(ptrns, outp))
+        .take(1)  //TODO @mark: TEMPORARY! REMOVE THIS!
         .sum()
 }
 
@@ -47,6 +49,7 @@ impl Possible {
     }
 
     fn without_goods(bads: &[usize], goods: &[usize]) -> Self {
+        eprintln!("  - {:?} x {:?}", &bads, &goods);  //TODO @mark: TEMPORARY! REMOVE THIS!
         let mut pos = Possible::new();
         for bad in bads {
             for good in goods {
@@ -70,18 +73,56 @@ impl Possible {
 
     fn combine(&mut self, other: Self, op: fn(bool, bool) -> bool) -> Self {
         let mut pos = Possible::new();
-        for bad in [0, 1, 2, 3, 4, 5, 6,] {
-            for good in [0, 1, 2, 3, 4, 5, 6,] {
+        for bad in 0 .. 7 {
+            for good in 0 .. 7 {
                 pos.grid[bad][good] = op(self.grid[bad][good], other.grid[bad][good])
             }
         }
         pos
+    }
+
+    fn is_solved(&self) -> bool {
+        for bad in 0 .. 7 {
+            let mut sum = 0;
+            for good in 0 .. 7 {
+                if self.grid[bad][good] {
+                    sum += 1
+                }
+            }
+            if sum != 1 {
+                return false
+            }
+        }
+        true
+    }
+}
+
+impl fmt::Display for Possible {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "  + ");
+        for good in 0 .. 7 {
+            write!(f, "{} ", good);
+        }
+        writeln!(f, "");
+        for bad in 0 .. 7 {
+            write!(f, "{} | ", bad);
+            for good in 0 .. 7 {
+                if self.grid[bad][good] {
+                    write!(f, "X ")?
+                } else {
+                    write!(f, "  ")?
+                }
+            }
+            writeln!(f, "")?
+        }
+        Ok(())
     }
 }
 
 fn find_mapping(ptrns: &[Vec<usize>]) -> Possible {
     let mut current = Possible::new();
     for ptrn in ptrns {
+        eprintln!(">> {:?}", &ptrn);  //TODO @mark: TEMPORARY! REMOVE THIS!
         current = current.and(match ptrn.len() {
             2 => Possible::without_goods(ptrn, &[0, 1, 3, 4, 6,]),  // 1
             3 => Possible::without_goods(ptrn, &[1, 3, 4, 6,]),  // 7
@@ -94,8 +135,11 @@ fn find_mapping(ptrns: &[Vec<usize>]) -> Possible {
                 Possible::without_goods(ptrn, &[4,])),  // 9
             7 => continue,  // 8
             _ => unreachable!(),
-        })
+        });
+        eprintln!("{}", &current);  //TODO @mark: TEMPORARY! REMOVE THIS!
     }
+    eprintln!("{}", &current);
+    assert!(current.is_solved());
     current
 }
 
