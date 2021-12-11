@@ -5,6 +5,8 @@ use ::std::fs::read_to_string;
 use ::itertools::Itertools;
 use bitmaps::Bitmap;
 
+use crate::yr2021::dec08::State::Solved;
+
 pub fn part_a() {
     let res = run1();
     println!("{}", res);
@@ -113,6 +115,17 @@ impl Possible {
         Possible { bits: self.bits | other.bits }
     }
 
+    /// Mapping from each bad segment to the correct one.
+    fn as_solved_vec(&self) -> Vec<usize> {
+        debug_assert!(self.state() == State::Solved);
+        (0 .. 7)
+            .map(|bad| (0 .. 7)
+                .map(|good| (good, self.get(bad, good)))
+                .skip_while(|(_, is_true)| !*is_true)
+                .next().expect("no mapping, impossible for solved").0
+            ).collect::<Vec<_>>()
+    }
+
     fn state(&self) -> State {
         let mut is_solved = true;
         for bad in 0 .. 7 {
@@ -160,30 +173,29 @@ impl fmt::Display for Possible {
 }
 
 /// Return solved Possible when this branch has a solution, or () if it is a dead end.
-fn find_mapping(ptrns: &[Vec<usize>], possible: Possible) -> Result<Possible, ()> {
+fn find_mapping(ptrns: &[Vec<usize>], possible: Possible) -> Result<Vec<usize>, ()> {
     let state = possible.state();
-    eprintln!("{}state: {}", &possible, state);  //TODO @mark: TEMPORARY! REMOVE THIS!
+    //eprintln!("{}state: {}", &possible, state);  //TODO @mark: TEMPORARY! REMOVE THIS!
     match state {
         State::Incomplete => {}
         State::Solved => {
-            eprintln!(">>>> done");
-            return Ok(possible)
+            return Ok(possible.as_solved_vec())
         },
         State::Conflict => return Err(()),
     }
     if let [ptrn, rest @ ..] = ptrns {
-        eprintln!(">> {:?} (of {})\n", &ptrn, ptrns.len());  //TODO @mark: TEMPORARY! REMOVE THIS!
+        //eprintln!(">> {:?} (of {})\n", &ptrn, ptrns.len());  //TODO @mark: TEMPORARY! REMOVE THIS!
         handle_head(ptrn, rest, possible)
     } else {
         match state {
             State::Incomplete => Err(()),
-            State::Solved => Ok(possible),
+            State::Solved => Ok(possible.as_solved_vec()),
             State::Conflict => Err(()),
         }
     }
 }
 
-fn handle_head(ptrn: &Vec<usize>, rest: &[Vec<usize>], possible: Possible) -> Result<Possible, ()> {
+fn handle_head(ptrn: &Vec<usize>, rest: &[Vec<usize>], possible: Possible) -> Result<Vec<usize>, ()> {
     match ptrn.len() {
         2 => find_mapping(rest, possible.and(Possible::keep(ptrn, &[2, 5,]))),  // 1
         3 => find_mapping(rest, possible.and(Possible::keep(ptrn, &[0, 2, 5,]))),  // 7
@@ -213,7 +225,14 @@ fn find_single_ok<T, E>(first: Result<T, E>, second: Result<T, E>, third: Result
     }
 }
 
-fn apply_mapping(mapping: Possible, outp: &[Vec<usize>]) -> u64 {
+fn apply_mapping(mapping: Vec<usize>, outps: &[Vec<usize>]) -> u64 {
+    for outp in outps {
+        let decoded = outp.iter()
+            .map(|seg| mapping[*seg])
+            .sorted()
+            .collect::<Vec<usize>>();
+        dbg!(decoded);
+    }
     unimplemented!()
 }
 
