@@ -45,6 +45,16 @@ enum State {
     Conflict,
 }
 
+impl fmt::Display for State {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", match self {
+            State::Incomplete => "incomplete",
+            State::Solved => "SOLVED",
+            State::Conflict => "conflict",
+        })
+    }
+}
+
 #[derive(Debug)]
 struct Possible {
     // would be cooler with bitmap, but this is easier and fast enough
@@ -135,7 +145,14 @@ impl fmt::Display for Possible {
 
 /// Return solved Possible when this branch has a solution, or () if it is a dead end.
 fn find_mapping(ptrns: &[Vec<usize>], possible: Possible) -> Result<Possible, ()> {
+    let state = possible.state();
+    eprint!("{}state: {}", &possible, state);  //TODO @mark: TEMPORARY! REMOVE THIS!
+    if matches!(state, State::Solved) {
+        eprintln!(">>>> done");
+        return Ok(possible)
+    }
     if let [ptrn, rest @ ..] = ptrns {
+        eprintln!(">> {:?} (of {})\n", &ptrn, ptrns.len());  //TODO @mark: TEMPORARY! REMOVE THIS!
         match ptrn.len() {
             2 => find_mapping(rest, possible.and(Possible::without_goods(ptrn, &[0, 1, 3, 4, 6, ]))),  // 1
             3 => find_mapping(rest, possible.and(Possible::without_goods(ptrn, &[1, 3, 4, 6, ]))),  // 7
@@ -154,7 +171,7 @@ fn find_mapping(ptrns: &[Vec<usize>], possible: Possible) -> Result<Possible, ()
             _ => panic!("impossible"),
         }
     } else {
-        match possible.state() {
+        match state {
             State::Incomplete => Err(()),
             State::Solved => Ok(possible),
             State::Conflict => Err(()),
