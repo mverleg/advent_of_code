@@ -68,20 +68,26 @@ impl Possible {
         }
     }
 
-    fn without_goods(bads: &[usize], goods: &[usize]) -> Self {
+    fn keep(bads: &[usize], goods: &[usize]) -> Self {
+        assert!(bads.len() == goods.len());
         eprintln!("  - {:?} x {:?}", &bads, &goods);  //TODO @mark: TEMPORARY! REMOVE THIS!
         let mut pos = Possible::new();
         for bad in bads {
+            for good in 0 .. 7 {
+                pos.grid[*bad][good] = false;
+            }
+        }
+        for good in goods {
+            for bad in 0 .. 7 {
+                pos.grid[bad][*good] = false;
+            }
+        }
+        for bad in bads {
             for good in goods {
-                pos.disable(*bad, *good)
+                pos.grid[*bad][*good] = true;
             }
         }
         pos
-    }
-
-    fn disable(&mut self, bad: usize, good: usize) {
-        self.grid[bad][good] = false;
-        self.grid[good][bad] = false;
     }
 
     fn and(&self, other: Self) -> Self {
@@ -174,18 +180,18 @@ fn find_mapping(ptrns: &[Vec<usize>], possible: Possible) -> Result<Possible, ()
 
 fn handle_head(ptrn: &Vec<usize>, rest: &[Vec<usize>], possible: Possible) -> Result<Possible, ()> {
     match ptrn.len() {
-        2 => find_mapping(rest, possible.and(Possible::without_goods(ptrn, &[0, 1, 3, 4, 6, ]))),  // 1
-        3 => find_mapping(rest, possible.and(Possible::without_goods(ptrn, &[1, 3, 4, 6, ]))),  // 7
-        4 => find_mapping(rest, possible.and(Possible::without_goods(ptrn, &[0, 4, 6, ]))),  //4
+        2 => find_mapping(rest, possible.and(Possible::keep(ptrn, &[2, 5,]))),  // 1
+        3 => find_mapping(rest, possible.and(Possible::keep(ptrn, &[0, 2, 5,]))),  // 7
+        4 => find_mapping(rest, possible.and(Possible::keep(ptrn, &[1, 2, 3, 5,]))),  //4
         5 => find_single_ok(
-            find_mapping(rest, possible.and(Possible::without_goods(ptrn, &[1, 5,]))),  // 2
-            find_mapping(rest, possible.and(Possible::without_goods(ptrn, &[1, 4,]))),  // 3
-            find_mapping(rest, possible.and(Possible::without_goods(ptrn, &[2, 4,]))),  // 5
+            find_mapping(rest, possible.and(Possible::keep(ptrn, &[0, 2, 3, 4, 6,]))),  // 2
+            find_mapping(rest, possible.and(Possible::keep(ptrn, &[0, 2, 3, 5, 6,]))),  // 3
+            find_mapping(rest, possible.and(Possible::keep(ptrn, &[0, 1, 3, 5, 6,]))),  // 5
         ),
         6 => find_single_ok(
-            find_mapping(rest, possible.and(Possible::without_goods(ptrn, &[3, ]))),  // 0
-            find_mapping(rest, possible.and(Possible::without_goods(ptrn, &[2, ]))),  // 6
-            find_mapping(rest, possible.and(Possible::without_goods(ptrn, &[4, ]))),  // 9
+            find_mapping(rest, possible.and(Possible::keep(ptrn, &[0, 1, 2, 4, 5, 6,]))),  // 0
+            find_mapping(rest, possible.and(Possible::keep(ptrn, &[0, 1, 3, 4, 5, 6,]))),  // 6
+            find_mapping(rest, possible.and(Possible::keep(ptrn, &[0, 1, 2, 3, 5, 6,]))),  // 9
         ),
         7 => find_mapping(rest, possible),  // 8
         _ => panic!("impossible"),
