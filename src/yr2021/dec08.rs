@@ -3,6 +3,7 @@ use ::std::fmt;
 use ::std::fs::read_to_string;
 
 use ::itertools::Itertools;
+use bitmaps::Bitmap;
 
 pub fn part_a() {
     let res = run1();
@@ -58,13 +59,13 @@ impl fmt::Display for State {
 #[derive(Debug)]
 struct Possible {
     // would be cooler with bitmap, but this is easier and fast enough
-    grid: [[bool; 7]; 7],
+    bits: Bitmap<49>,
 }
 
 impl Possible {
     fn new() -> Self {
         Possible {
-            grid: [[true; 7]; 7],
+            bits: Bitmap::mask(7 * 7),
         }
     }
 
@@ -74,38 +75,42 @@ impl Possible {
         let mut pos = Possible::new();
         for bad in bads {
             for good in 0 .. 7 {
-                pos.grid[*bad][good] = false;
+                pos.set(*bad, good, false);
             }
         }
         for good in goods {
             for bad in 0 .. 7 {
-                pos.grid[bad][*good] = false;
+                pos.set(bad, *good, false);
             }
         }
         for bad in bads {
             for good in goods {
-                pos.grid[*bad][*good] = true;
+                pos.set(*bad, *good, true);
             }
         }
         pos
+    }
+
+    fn calc_index(&self, bad: usize, good: usize) -> usize {
+        debug_assert!(bad < 7);
+        debug_assert!(good < 7);
+        bad * 7 + good
+    }
+
+    fn get(&self, bad: usize, good: usize) -> bool {
+        self.bits.get(self.calc_index(bad, good))
+    }
+
+    fn set(&mut self, bad: usize, good: usize, value: bool) {
+        self.bits.set(self.calc_index(bad, good), value);
     }
 
     fn and(&self, other: Self) -> Self {
-        self.combine(other, |a, b| a && b)
+        Possible { bits: self.bits & other.bits }
     }
 
     fn or(&self, other: Self) -> Self {
-        self.combine(other, |a, b| a || b)
-    }
-
-    fn combine(&self, other: Self, op: fn(bool, bool) -> bool) -> Self {
-        let mut pos = Possible::new();
-        for bad in 0 .. 7 {
-            for good in 0 .. 7 {
-                pos.grid[bad][good] = op(self.grid[bad][good], other.grid[bad][good])
-            }
-        }
-        pos
+        Possible { bits: self.bits | other.bits }
     }
 
     fn state(&self) -> State {
@@ -113,7 +118,7 @@ impl Possible {
         for bad in 0 .. 7 {
             let mut sum = 0;
             for good in 0 .. 7 {
-                if self.grid[bad][good] {
+                if self.get(bad, good) {
                     sum += 1
                 }
             }
@@ -142,7 +147,7 @@ impl fmt::Display for Possible {
         for bad in 0 .. 7 {
             write!(f, "{} | ", bad);
             for good in 0 .. 7 {
-                if self.grid[bad][good] {
+                if self.get(bad, good) {
                     write!(f, "X ")?
                 } else {
                     write!(f, "  ")?
