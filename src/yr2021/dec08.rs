@@ -2,10 +2,23 @@ use ::std::collections::HashMap;
 use ::std::fmt;
 use ::std::fs::read_to_string;
 
+use ::bitmaps::Bitmap;
 use ::itertools::Itertools;
-use bitmaps::Bitmap;
 
 use crate::yr2021::dec08::State::Solved;
+
+const DIGIT_SEGS: [&[usize]; 10] = [
+    &[0, 1, 2, 4, 5, 6,],  // 0
+    &[2, 5,],  // 1
+    &[0, 2, 3, 4, 6,],  // 2
+    &[0, 2, 3, 5, 6,],  // 3
+    &[1, 2, 3, 5,],  //4
+    &[0, 1, 3, 5, 6,],  // 5
+    &[0, 1, 3, 4, 5, 6,],  // 6
+    &[0, 2, 5,],  // 7
+    &[0, 1, 2, 3, 4, 5, 6,],  // 8
+    &[0, 1, 2, 3, 5, 6,],  // 9
+];
 
 pub fn part_a() {
     let res = run1();
@@ -30,7 +43,6 @@ fn run1() -> u64 {
 fn run2() -> u64 {
     parse_input().iter()
         .map(|(ptrns, outp)| row(ptrns, outp))
-        .take(1)  //TODO @mark: TEMPORARY! REMOVE THIS!
         .sum()
 }
 
@@ -73,7 +85,7 @@ impl Possible {
 
     fn keep(bads: &[usize], goods: &[usize]) -> Self {
         assert!(bads.len() == goods.len());
-        eprintln!("  - {:?} x {:?}", &bads, &goods);  //TODO @mark: TEMPORARY! REMOVE THIS!
+        //eprintln!("  - {:?} x {:?}", &bads, &goods);  //TODO @mark: TEMPORARY! REMOVE THIS!
         let mut pos = Possible::new();
         for bad in bads {
             for good in 0 .. 7 {
@@ -121,7 +133,7 @@ impl Possible {
         (0 .. 7)
             .map(|bad| (0 .. 7)
                 .map(|good| (good, self.get(bad, good)))
-                .skip_while(|(_, is_true)| !*is_true)
+                .filter(|(_, is_true)| *is_true)
                 .next().expect("no mapping, impossible for solved").0
             ).collect::<Vec<_>>()
     }
@@ -197,18 +209,18 @@ fn find_mapping(ptrns: &[Vec<usize>], possible: Possible) -> Result<Vec<usize>, 
 
 fn handle_head(ptrn: &Vec<usize>, rest: &[Vec<usize>], possible: Possible) -> Result<Vec<usize>, ()> {
     match ptrn.len() {
-        2 => find_mapping(rest, possible.and(Possible::keep(ptrn, &[2, 5,]))),  // 1
-        3 => find_mapping(rest, possible.and(Possible::keep(ptrn, &[0, 2, 5,]))),  // 7
-        4 => find_mapping(rest, possible.and(Possible::keep(ptrn, &[1, 2, 3, 5,]))),  //4
+        2 => find_mapping(rest, possible.and(Possible::keep(ptrn, DIGIT_SEGS[1]))),
+        3 => find_mapping(rest, possible.and(Possible::keep(ptrn, DIGIT_SEGS[7]))),
+        4 => find_mapping(rest, possible.and(Possible::keep(ptrn, DIGIT_SEGS[4]))),
         5 => find_single_ok(
-            find_mapping(rest, possible.and(Possible::keep(ptrn, &[0, 2, 3, 4, 6,]))),  // 2
-            find_mapping(rest, possible.and(Possible::keep(ptrn, &[0, 2, 3, 5, 6,]))),  // 3
-            find_mapping(rest, possible.and(Possible::keep(ptrn, &[0, 1, 3, 5, 6,]))),  // 5
+            find_mapping(rest, possible.and(Possible::keep(ptrn, DIGIT_SEGS[2]))),
+            find_mapping(rest, possible.and(Possible::keep(ptrn, DIGIT_SEGS[3]))),
+            find_mapping(rest, possible.and(Possible::keep(ptrn, DIGIT_SEGS[5]))),
         ),
         6 => find_single_ok(
-            find_mapping(rest, possible.and(Possible::keep(ptrn, &[0, 1, 2, 4, 5, 6,]))),  // 0
-            find_mapping(rest, possible.and(Possible::keep(ptrn, &[0, 1, 3, 4, 5, 6,]))),  // 6
-            find_mapping(rest, possible.and(Possible::keep(ptrn, &[0, 1, 2, 3, 5, 6,]))),  // 9
+            find_mapping(rest, possible.and(Possible::keep(ptrn, DIGIT_SEGS[0]))),
+            find_mapping(rest, possible.and(Possible::keep(ptrn, DIGIT_SEGS[6]))),
+            find_mapping(rest, possible.and(Possible::keep(ptrn, DIGIT_SEGS[9]))),
         ),
         7 => find_mapping(rest, possible),  // 8
         _ => panic!("impossible"),
@@ -226,14 +238,20 @@ fn find_single_ok<T, E>(first: Result<T, E>, second: Result<T, E>, third: Result
 }
 
 fn apply_mapping(mapping: Vec<usize>, outps: &[Vec<usize>]) -> u64 {
+    let mut total = 0;
     for outp in outps {
         let decoded = outp.iter()
             .map(|seg| mapping[*seg])
             .sorted()
             .collect::<Vec<usize>>();
-        dbg!(decoded);
+        let digit = DIGIT_SEGS.iter()
+            .enumerate()
+            .filter(|(nr, segs)| **segs == decoded.as_slice())
+            .next().expect("found an unrecognized output pattern").0;
+        total *= 10;
+        total += digit;
     }
-    unimplemented!()
+    total as u64
 }
 
 fn char2pos(c: char) -> usize {
