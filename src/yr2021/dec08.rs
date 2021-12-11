@@ -32,7 +32,9 @@ fn run2() -> u64 {
 }
 
 fn row(ptrns: &[Vec<usize>], outp: &[Vec<usize>]) -> u64 {
-    let mapping = find_mapping(ptrns);
+    let possible = Possible::new();
+    let mapping = find_mapping(ptrns, possible)
+        .expect("top level `find_mapping` did not find a solution");
     apply_mapping(mapping, outp)
 }
 
@@ -72,15 +74,15 @@ impl Possible {
         self.grid[good][bad] = false;
     }
 
-    fn and(&mut self, other: Self) -> Self {
+    fn and(&self, other: Self) -> Self {
         self.combine(other, |a, b| a && b)
     }
 
-    fn or(&mut self, other: Self) -> Self {
+    fn or(&self, other: Self) -> Self {
         self.combine(other, |a, b| a || b)
     }
 
-    fn combine(&mut self, other: Self, op: fn(bool, bool) -> bool) -> Self {
+    fn combine(&self, other: Self, op: fn(bool, bool) -> bool) -> Self {
         let mut pos = Possible::new();
         for bad in 0 .. 7 {
             for good in 0 .. 7 {
@@ -131,28 +133,63 @@ impl fmt::Display for Possible {
     }
 }
 
-fn find_mapping(ptrns: &[Vec<usize>]) -> Possible {
-    let mut current = Possible::new();
-    for ptrn in ptrns {
-        eprintln!(">> {:?}", &ptrn);  //TODO @mark: TEMPORARY! REMOVE THIS!
-        current = current.and(match ptrn.len() {
-            2 => Possible::without_goods(ptrn, &[0, 1, 3, 4, 6,]),  // 1
-            3 => Possible::without_goods(ptrn, &[1, 3, 4, 6,]),  // 7
-            4 => Possible::without_goods(ptrn, &[0, 4, 6,]),  //4
-            5 => Possible::without_goods(ptrn, &[1, 5,]).or(  // 2
-                Possible::without_goods(ptrn, &[1, 4,])).or(  // 3
-                Possible::without_goods(ptrn, &[2, 4,])),  // 5
-            6 => Possible::without_goods(ptrn, &[3,]).or(  // 0
-                Possible::without_goods(ptrn, &[2,])).or(  // 6
-                Possible::without_goods(ptrn, &[4,])),  // 9
-            7 => continue,  // 8
-            _ => unreachable!(),
-        });
-        eprintln!("{}", &current);  //TODO @mark: TEMPORARY! REMOVE THIS!
+/// Return solved Possible when this branch has a solution, or () if it is a dead end.
+fn find_mapping(ptrns: &[Vec<usize>], possible: Possible) -> Result<Possible, ()> {
+    if let [ptrn, rest @ ..] = ptrns {
+        match ptrn.len() {
+            2 => find_mapping(rest, possible.and(Possible::without_goods(ptrn, &[0, 1, 3, 4, 6, ]))),  // 1
+            3 => find_mapping(rest, possible.and(Possible::without_goods(ptrn, &[1, 3, 4, 6, ]))),  // 7
+            4 => find_mapping(rest, possible.and(Possible::without_goods(ptrn, &[0, 4, 6, ]))),  //4
+            5 => find_single_ok(
+                find_mapping(rest, possible.and(Possible::without_goods(ptrn, &[1, 5,]))),  // 2
+                find_mapping(rest, possible.and(Possible::without_goods(ptrn, &[1, 4,]))),  // 3
+                find_mapping(rest, possible.and(Possible::without_goods(ptrn, &[2, 4,]))),  // 5
+            ),
+            6 => find_single_ok(
+                find_mapping(rest, possible.and(Possible::without_goods(ptrn, &[3, ]))),  // 0
+                find_mapping(rest, possible.and(Possible::without_goods(ptrn, &[2, ]))),  // 6
+                find_mapping(rest, possible.and(Possible::without_goods(ptrn, &[4, ]))),  // 9
+            ),
+            7 => find_mapping(rest, possible),  // 8
+            _ => panic!("impossible"),
+        }
+    } else {
+        match possible.state() {
+            State::Incomplete => Err(()),
+            State::Solved => Ok(possible),
+            State::Conflict => Err(()),
+        }
     }
-    eprintln!("{}", &current);
-    assert!(current.state() == State::Solved);
-    current
+    // for ptrn in ptrns {
+    //     eprintln!(">> {:?}", &ptrn);  //TODO @mark: TEMPORARY! REMOVE THIS!
+    //     possible = possible.and(match ptrn.len() {
+    //         2 => Possible::without_goods(ptrn, &[0, 1, 3, 4, 6,]),  // 1
+    //         3 => Possible::without_goods(ptrn, &[1, 3, 4, 6,]),  // 7
+    //         4 => Possible::without_goods(ptrn, &[0, 4, 6,]),  //4
+    //         5 => Possible::without_goods(ptrn, &[1, 5,]).or(  // 2
+    //             Possible::without_goods(ptrn, &[1, 4,])).or(  // 3
+    //             Possible::without_goods(ptrn, &[2, 4,])),  // 5
+    //         6 => Possible::without_goods(ptrn, &[3,]).or(  // 0
+    //             Possible::without_goods(ptrn, &[2,])).or(  // 6
+    //             Possible::without_goods(ptrn, &[4,])),  // 9
+    //         7 => continue,  // 8
+    //         _ => unreachable!(),
+    //     });
+    //     eprintln!("{}", &possible);  //TODO @mark: TEMPORARY! REMOVE THIS!
+    // }
+    // eprintln!("{}", &possible);
+    // assert!(possible.state() == State::Solved);
+    // possible
+}
+
+fn find_single_ok<T, E>(first: Result<T, E>, second: Result<T, E>, third: Result<T, E>) -> Result<T, E> {
+    match (first, second, third) {
+        (Err(first), Err(_), Err(_)) => Err(first),
+        (Ok(val), Err(_), Err(_)) => Ok(val),
+        (Err(_), Ok(val), Err(_)) => Ok(val),
+        (Err(_), Err(_), Ok(val)) => Ok(val),
+        _ => panic!("found multiple successful results"),
+    }
 }
 
 fn apply_mapping(mapping: Possible, outp: &[Vec<usize>]) -> u64 {
