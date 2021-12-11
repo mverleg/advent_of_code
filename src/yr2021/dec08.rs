@@ -36,8 +36,16 @@ fn row(ptrns: &[Vec<usize>], outp: &[Vec<usize>]) -> u64 {
     apply_mapping(mapping, outp)
 }
 
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+enum State {
+    Incomplete,
+    Solved,
+    Conflict,
+}
+
 #[derive(Debug)]
 struct Possible {
+    // would be cooler with bitmap, but this is easier and fast enough
     grid: [[bool; 7]; 7],
 }
 
@@ -61,6 +69,7 @@ impl Possible {
 
     fn disable(&mut self, bad: usize, good: usize) {
         self.grid[bad][good] = false;
+        self.grid[good][bad] = false;
     }
 
     fn and(&mut self, other: Self) -> Self {
@@ -81,7 +90,7 @@ impl Possible {
         pos
     }
 
-    fn is_solved(&self) -> bool {
+    fn state(&self) -> State {
         for bad in 0 .. 7 {
             let mut sum = 0;
             for good in 0 .. 7 {
@@ -89,11 +98,14 @@ impl Possible {
                     sum += 1
                 }
             }
-            if sum != 1 {
-                return false
+            if sum == 0 {
+                return State::Conflict
+            }
+            if sum > 1 {
+                return State::Incomplete
             }
         }
-        true
+        State::Solved
     }
 }
 
@@ -139,41 +151,13 @@ fn find_mapping(ptrns: &[Vec<usize>]) -> Possible {
         eprintln!("{}", &current);  //TODO @mark: TEMPORARY! REMOVE THIS!
     }
     eprintln!("{}", &current);
-    assert!(current.is_solved());
+    assert!(current.state() == State::Solved);
     current
 }
 
 fn apply_mapping(mapping: Possible, outp: &[Vec<usize>]) -> u64 {
     unimplemented!()
 }
-
-// fn find_mapping(ptrns: &Vec<Vec<usize>>) -> [usize; 9] {
-//     ptrns.iter()
-//         .map(|ptrn| possibilities(ptrn))
-//         .inspect(|possib| eprintln!("{:?}", possib))
-//         .reduce(|a, b| unimplemented!());
-//
-//     unimplemented!()
-// }
-//
-// fn possibilities(word: &Vec<usize>) -> Vec<(i32, [Option<usize>; 9])> {
-//     match word.len() {
-//         2 => vec![
-//             (1, [None, None, Some(word[0]), None, None, None, None, Some(word[1]), None,]),
-//             (1, [None, None, Some(word[1]), None, None, None, None, Some(word[0]), None,]),
-//         ],
-//         3 => unimplemented!(),
-//         4 => unimplemented!(),
-//         5 => unimplemented!(),
-//         6 => unimplemented!(),
-//         7 => vec![
-//             (7, [Some(word[0]), None, Some(word[1]), None, None, None, None, Some(word[2]), None,]),
-//             (7, [Some(word[0]), None, Some(word[2]), None, None, None, None, Some(word[1]), None,]),
-//             //TODO @mark: more
-//         ],
-//         _ => unreachable!(),
-//     }
-// }
 
 fn char2pos(c: char) -> usize {
     (c as usize) - ('a' as usize)
@@ -182,17 +166,24 @@ fn char2pos(c: char) -> usize {
 fn parse_input() -> Vec<(Vec<Vec<usize>>, Vec<Vec<usize>>)> {
     let inps = get_lines("data/2021/dec08.txt").iter()
         .map(|line| line.split_once(" | ").unwrap())
-        .map(|(ptrns, outp)| (space_sep_chars(ptrns), space_sep_chars(outp)))
+        .map(|(ptrns, outp)| (space_sep_chars(ptrns, true), space_sep_chars(outp, false)))
         .collect::<Vec<_>>();
     inps
 }
 
-fn space_sep_chars(txt: &str) -> Vec<Vec<usize>> {
-    txt.split(" ")
+fn space_sep_chars(txt: &str, sort: bool) -> Vec<Vec<usize>> {
+    let mut words: Vec<Vec<usize>> = txt.split(" ")
         .map(|word| word.chars()
             .map(char2pos)
             .collect::<Vec<_>>())
-        .collect()
+        .collect();
+    if sort {
+        words.sort_by_key(|word| match word.len() {
+            7 => 1,
+            x => x,
+        })
+    }
+    words
 }
 
 fn get_lines(pth: &str) -> Vec<String> {
