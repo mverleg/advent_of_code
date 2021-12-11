@@ -36,7 +36,7 @@ fn row(ptrns: &[Vec<usize>], outp: &[Vec<usize>]) -> u64 {
 
 #[derive(Debug)]
 struct Possible {
-    grid: [[bool; 7]; 7]
+    grid: [[bool; 7]; 7],
 }
 
 impl Possible {
@@ -46,16 +46,36 @@ impl Possible {
         }
     }
 
-    fn disable(&mut self, from: usize, to: usize) -> Self {
-        unimplemented!()
+    fn without_goods(bads: &[usize], goods: &[usize]) -> Self {
+        let mut pos = Possible::new();
+        for bad in bads {
+            for good in goods {
+                pos.disable(*bad, *good)
+            }
+        }
+        pos
+    }
+
+    fn disable(&mut self, bad: usize, good: usize) {
+        self.grid[bad][good] = false;
     }
 
     fn and(&mut self, other: Self) -> Self {
-        unimplemented!()
+        self.combine(other, |a, b| a && b)
     }
 
     fn or(&mut self, other: Self) -> Self {
-        unimplemented!()
+        self.combine(other, |a, b| a || b)
+    }
+
+    fn combine(&mut self, other: Self, op: fn(bool, bool) -> bool) -> Self {
+        let mut pos = Possible::new();
+        for bad in [0, 1, 2, 3, 4, 5, 6,] {
+            for good in [0, 1, 2, 3, 4, 5, 6,] {
+                pos.grid[bad][good] = op(self.grid[bad][good], other.grid[bad][good])
+            }
+        }
+        pos
     }
 }
 
@@ -63,14 +83,16 @@ fn find_mapping(ptrns: &[Vec<usize>]) -> Possible {
     let mut current = Possible::new();
     for ptrn in ptrns {
         current = current.and(match ptrn.len() {
-            2 => {
-                return Possible::new()
-            },
-            3 => unimplemented!(),
-            4 => unimplemented!(),
-            5 => unimplemented!(),
-            6 => unimplemented!(),
-            7 => unimplemented!(),
+            2 => Possible::without_goods(ptrn, &[0, 1, 3, 4, 6,]),  // 1
+            3 => Possible::without_goods(ptrn, &[1, 3, 4, 6,]),  // 7
+            4 => Possible::without_goods(ptrn, &[0, 4, 6,]),  //4
+            5 => Possible::without_goods(ptrn, &[1, 5,]).or(  // 2
+                Possible::without_goods(ptrn, &[1, 4,])).or(  // 3
+                Possible::without_goods(ptrn, &[2, 4,])),  // 5
+            6 => Possible::without_goods(ptrn, &[3,]).or(  // 0
+                Possible::without_goods(ptrn, &[2,])).or(  // 6
+                Possible::without_goods(ptrn, &[4,])),  // 9
+            7 => continue,  // 8
             _ => unreachable!(),
         })
     }
