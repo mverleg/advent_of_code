@@ -103,6 +103,7 @@ impl Possible {
     }
 
     fn state(&self) -> State {
+        let mut is_solved = true;
         for bad in 0 .. 7 {
             let mut sum = 0;
             for good in 0 .. 7 {
@@ -114,10 +115,14 @@ impl Possible {
                 return State::Conflict
             }
             if sum > 1 {
-                return State::Incomplete
+                is_solved = false;
             }
         }
-        State::Solved
+        if is_solved {
+            State::Solved
+        } else {
+            State::Incomplete
+        }
     }
 }
 
@@ -146,30 +151,18 @@ impl fmt::Display for Possible {
 /// Return solved Possible when this branch has a solution, or () if it is a dead end.
 fn find_mapping(ptrns: &[Vec<usize>], possible: Possible) -> Result<Possible, ()> {
     let state = possible.state();
-    eprint!("{}state: {}", &possible, state);  //TODO @mark: TEMPORARY! REMOVE THIS!
-    if matches!(state, State::Solved) {
-        eprintln!(">>>> done");
-        return Ok(possible)
+    eprintln!("{}state: {}", &possible, state);  //TODO @mark: TEMPORARY! REMOVE THIS!
+    match state {
+        State::Incomplete => {}
+        State::Solved => {
+            eprintln!(">>>> done");
+            return Ok(possible)
+        },
+        State::Conflict => return Err(()),
     }
     if let [ptrn, rest @ ..] = ptrns {
         eprintln!(">> {:?} (of {})\n", &ptrn, ptrns.len());  //TODO @mark: TEMPORARY! REMOVE THIS!
-        match ptrn.len() {
-            2 => find_mapping(rest, possible.and(Possible::without_goods(ptrn, &[0, 1, 3, 4, 6, ]))),  // 1
-            3 => find_mapping(rest, possible.and(Possible::without_goods(ptrn, &[1, 3, 4, 6, ]))),  // 7
-            4 => find_mapping(rest, possible.and(Possible::without_goods(ptrn, &[0, 4, 6, ]))),  //4
-            5 => find_single_ok(
-                find_mapping(rest, possible.and(Possible::without_goods(ptrn, &[1, 5,]))),  // 2
-                find_mapping(rest, possible.and(Possible::without_goods(ptrn, &[1, 4,]))),  // 3
-                find_mapping(rest, possible.and(Possible::without_goods(ptrn, &[2, 4,]))),  // 5
-            ),
-            6 => find_single_ok(
-                find_mapping(rest, possible.and(Possible::without_goods(ptrn, &[3, ]))),  // 0
-                find_mapping(rest, possible.and(Possible::without_goods(ptrn, &[2, ]))),  // 6
-                find_mapping(rest, possible.and(Possible::without_goods(ptrn, &[4, ]))),  // 9
-            ),
-            7 => find_mapping(rest, possible),  // 8
-            _ => panic!("impossible"),
-        }
+        handle_head(ptrn, rest, possible)
     } else {
         match state {
             State::Incomplete => Err(()),
@@ -177,26 +170,26 @@ fn find_mapping(ptrns: &[Vec<usize>], possible: Possible) -> Result<Possible, ()
             State::Conflict => Err(()),
         }
     }
-    // for ptrn in ptrns {
-    //     eprintln!(">> {:?}", &ptrn);  //TODO @mark: TEMPORARY! REMOVE THIS!
-    //     possible = possible.and(match ptrn.len() {
-    //         2 => Possible::without_goods(ptrn, &[0, 1, 3, 4, 6,]),  // 1
-    //         3 => Possible::without_goods(ptrn, &[1, 3, 4, 6,]),  // 7
-    //         4 => Possible::without_goods(ptrn, &[0, 4, 6,]),  //4
-    //         5 => Possible::without_goods(ptrn, &[1, 5,]).or(  // 2
-    //             Possible::without_goods(ptrn, &[1, 4,])).or(  // 3
-    //             Possible::without_goods(ptrn, &[2, 4,])),  // 5
-    //         6 => Possible::without_goods(ptrn, &[3,]).or(  // 0
-    //             Possible::without_goods(ptrn, &[2,])).or(  // 6
-    //             Possible::without_goods(ptrn, &[4,])),  // 9
-    //         7 => continue,  // 8
-    //         _ => unreachable!(),
-    //     });
-    //     eprintln!("{}", &possible);  //TODO @mark: TEMPORARY! REMOVE THIS!
-    // }
-    // eprintln!("{}", &possible);
-    // assert!(possible.state() == State::Solved);
-    // possible
+}
+
+fn handle_head(ptrn: &Vec<usize>, rest: &[Vec<usize>], possible: Possible) -> Result<Possible, ()> {
+    match ptrn.len() {
+        2 => find_mapping(rest, possible.and(Possible::without_goods(ptrn, &[0, 1, 3, 4, 6, ]))),  // 1
+        3 => find_mapping(rest, possible.and(Possible::without_goods(ptrn, &[1, 3, 4, 6, ]))),  // 7
+        4 => find_mapping(rest, possible.and(Possible::without_goods(ptrn, &[0, 4, 6, ]))),  //4
+        5 => find_single_ok(
+            find_mapping(rest, possible.and(Possible::without_goods(ptrn, &[1, 5,]))),  // 2
+            find_mapping(rest, possible.and(Possible::without_goods(ptrn, &[1, 4,]))),  // 3
+            find_mapping(rest, possible.and(Possible::without_goods(ptrn, &[2, 4,]))),  // 5
+        ),
+        6 => find_single_ok(
+            find_mapping(rest, possible.and(Possible::without_goods(ptrn, &[3, ]))),  // 0
+            find_mapping(rest, possible.and(Possible::without_goods(ptrn, &[2, ]))),  // 6
+            find_mapping(rest, possible.and(Possible::without_goods(ptrn, &[4, ]))),  // 9
+        ),
+        7 => find_mapping(rest, possible),  // 8
+        _ => panic!("impossible"),
+    }
 }
 
 fn find_single_ok<T, E>(first: Result<T, E>, second: Result<T, E>, third: Result<T, E>) -> Result<T, E> {
