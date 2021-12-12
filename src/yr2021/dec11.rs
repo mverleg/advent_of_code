@@ -5,7 +5,7 @@ use ::itertools::Itertools;
 use ::lazy_static::lazy_static;
 use ::regex::Regex;
 
-const T: usize = 3;
+const T: usize = 100;
 
 lazy_static! {
     static ref RE: Regex = Regex::new(r"^([0-9]+)\s+([0-9]+)$").unwrap();
@@ -30,7 +30,7 @@ struct Res {
 fn run1() -> u64 {
     let mut grid = get_grid("data/2021/dec11.txt");
     let mut flash_cnt = 0;
-    print_grid(&mut grid);  //TODO @mark: TEMPORARY! REMOVE THIS!
+    //print_grid(&mut grid);  //TODO @mark: TEMPORARY! REMOVE THIS!
 
     for t in 0 .. T {
         // step 1 (increase) and 2a (flash)
@@ -46,7 +46,7 @@ fn run1() -> u64 {
             }
         });
 
-        print_grid(&mut grid);  //TODO @mark: TEMPORARY! REMOVE THIS!
+        //print_grid(&mut grid);  //TODO @mark: TEMPORARY! REMOVE THIS!
         dbg!(flash_cnt);
     }
 
@@ -78,16 +78,16 @@ fn print_grid(grid: &mut Vec<Vec<u8>>) {
 
 fn flash(grid: &mut [Vec<u8>], x: usize, y: usize) {
     let value = &mut grid[x][y];
-    eprintln!("visit {}, {} at {}", x, y, value);
+    // eprintln!("visit {}, {} at {}", x, y, value);
     if *value > 9 {
         return
     }
     *value += 1;
-    eprintln!("  +1");
+    // eprintln!("  +1");
     if *value <= 9 {
         return
     }
-    eprintln!("  flash");
+    // eprintln!("  flash");
     if x > 0 {
         flash(grid, x - 1, y);
         if y > 0 {
