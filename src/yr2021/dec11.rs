@@ -5,17 +5,19 @@ use ::itertools::Itertools;
 use ::lazy_static::lazy_static;
 use ::regex::Regex;
 
+const T: usize = 3;
+
 lazy_static! {
     static ref RE: Regex = Regex::new(r"^([0-9]+)\s+([0-9]+)$").unwrap();
 }
 
 pub fn part_a() {
-    let res = run();
+    let res = run1();
     println!("{}", res);
 }
 
 pub fn part_b() {
-    let res = run();
+    let res = run1();
     println!("{}", res);
 }
 
@@ -25,11 +27,11 @@ struct Res {
     price: u32,
 }
 
-fn run() -> u64 {
+fn run1() -> u64 {
     let mut grid = get_grid("data/2021/dec11.txt");
     let mut flash_cnt = 0;
 
-    for t in 0 .. 100 {
+    for t in 0 .. T {
         // step 1 (increase) and 2a (flash)
         for x in 0 .. grid.len() {
             for y in 0 .. grid[0].len() {
@@ -47,13 +49,52 @@ fn run() -> u64 {
                 }
             }
         }
+
+        // print
+        for x in 0 .. grid.len() {
+            for y in 0..grid[0].len() {
+                print!("{} ", grid[x][y]);
+            }
+            println!("")
+        }
+        dbg!(flash_cnt);
     }
 
     flash_cnt
 }
 
 fn flash(grid: &mut [Vec<u8>], x: usize, y: usize) {
-    unimplemented!()
+    if grid[x][y] > 10 {
+        return
+    }
+    grid[x][y] += 1;
+    if grid[x][y] <= 9 {
+        return
+    }
+    if x > 0 {
+        flash(grid, x - 1, y);
+        if y > 0 {
+            flash(grid, x - 1, y - 1)
+        }
+        if y < grid[0].len() - 1 {
+            flash(grid, x - 1, y + 1);
+        }
+    }
+    if x < grid.len() - 1 {
+        flash(grid, x + 1, y);
+        if y > 0 {
+            flash(grid, x + 1, y - 1)
+        }
+        if y < grid[0].len() - 1 {
+            flash(grid, x + 1, y + 1);
+        }
+    }
+    if y > 0 {
+        flash(grid, x, y - 1);
+    }
+    if y < grid[0].len() - 1 {
+        flash(grid, x, y + 1);
+    }
 }
 
 fn get_grid(pth: &str) -> Vec<Vec<u8>> {
