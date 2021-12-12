@@ -52,11 +52,12 @@ fn run2() -> u64 {
         .sorted()
         .rev()
         .take(3)
+        //.inspect(|v| eprintln!("> {}", v))
         .product()
 }
 
 fn fill_basin(grid: &[Vec<u8>], basin_ids: &mut [Vec<usize>], x: usize, y: usize, id: usize) -> u64 {
-    eprintln!("{}, {} = {}", x, y, id);  //TODO @mark: TEMPORARY! REMOVE THIS!
+    //eprintln!("{}, {} = {}", x, y, id);  //TODO @mark: TEMPORARY! REMOVE THIS!
     if basin_ids[x][y] != 0 {
         return 0;
     }
@@ -71,7 +72,12 @@ fn fill_basin(grid: &[Vec<u8>], basin_ids: &mut [Vec<usize>], x: usize, y: usize
     if x < grid.len() - 1 {
         size += fill_basin(grid, basin_ids, x + 1, y, id);
     }
-    unimplemented!();
+    if y > 0 {
+        size += fill_basin(grid, basin_ids, x, y - 1, id);
+    }
+    if y < grid[0].len() - 1 {
+        size += fill_basin(grid, basin_ids, x, y + 1, id);
+    }
     size + 1
 }
 
