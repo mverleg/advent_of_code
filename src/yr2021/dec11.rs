@@ -5,34 +5,21 @@ use ::itertools::Itertools;
 use ::lazy_static::lazy_static;
 use ::regex::Regex;
 
-const T: usize = 100;
-
-lazy_static! {
-    static ref RE: Regex = Regex::new(r"^([0-9]+)\s+([0-9]+)$").unwrap();
-}
-
 pub fn part_a() {
-    let res = run1();
+    let res = run1(100);
     println!("{}", res);
 }
 
 pub fn part_b() {
-    let res = run1();
+    let res = run2();
     println!("{}", res);
 }
 
-#[derive(Debug, Hash, PartialEq, Eq, PartialOrd, Ord, Clone)]
-struct Res {
-    id: u32,
-    price: u32,
-}
-
-fn run1() -> u64 {
+fn run1(max_iter: i32) -> u64 {
     let mut grid = get_grid("data/2021/dec11.txt");
     let mut flash_cnt = 0;
-    //print_grid(&mut grid);  //TODO @mark: TEMPORARY! REMOVE THIS!
 
-    for t in 0 .. T {
+    for t in 0 .. max_iter {
         // step 1 (increase) and 2a (flash)
         for_grid(&mut grid, |g, x, y| {
             flash(g, x, y)
@@ -45,12 +32,36 @@ fn run1() -> u64 {
                 *val = 0
             }
         });
-
-        //print_grid(&mut grid);  //TODO @mark: TEMPORARY! REMOVE THIS!
-        dbg!(flash_cnt);
     }
 
     flash_cnt
+}
+
+fn run2() -> u64 {
+    let mut grid = get_grid("data/2021/dec11.txt");
+    let grid_size = grid.len() * grid[0].len();
+    let mut iter_nr = 0;
+    loop {
+        iter_nr += 1;
+        let mut iter_flash_count = 0;
+
+        // step 1 (increase) and 2a (flash)
+        for_grid(&mut grid, |g, x, y| {
+            flash(g, x, y)
+        });
+
+        // step 2b (count flashes) and 3 (reset)
+        for_grid_val(&mut grid, |val| {
+            if *val > 9 {
+                iter_flash_count += 1;
+                *val = 0
+            }
+        });
+
+        if iter_flash_count == grid_size {
+            return iter_nr
+        }
+    }
 }
 
 fn for_grid(grid: &mut [Vec<u8>], mut op: impl FnMut(&mut [Vec<u8>], usize, usize)) {
