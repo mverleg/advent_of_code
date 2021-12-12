@@ -78,14 +78,16 @@ fn print_grid(grid: &mut Vec<Vec<u8>>) {
 
 fn flash(grid: &mut [Vec<u8>], x: usize, y: usize) {
     let value = &mut grid[x][y];
-    if *value > 10 {
+    eprintln!("visit {}, {} at {}", x, y, value);
+    if *value > 9 {
         return
     }
     *value += 1;
+    eprintln!("  +1");
     if *value <= 9 {
         return
     }
-    eprintln!("flash {}, {} at {}", x, y, value);
+    eprintln!("  flash");
     if x > 0 {
         flash(grid, x - 1, y);
         if y > 0 {
@@ -121,7 +123,23 @@ fn simple_noflash() {
 
 #[test]
 fn simple_flash() {
-    unimplemented!();  //TODO @mark
+    let mut grid = vec![vec![0, 0, 0], vec![0, 9, 0], vec![0, 0, 0]];
+    for_grid(&mut grid, flash);
+    assert_eq!(grid, vec![vec![2, 2, 2], vec![2, 10, 2], vec![2, 2, 2]]);
+}
+
+#[test]
+fn surrounded_flash() {
+    let mut grid = vec![vec![9, 9, 9], vec![9, 1, 9], vec![9, 9, 9]];
+    for_grid(&mut grid, flash);
+    assert_eq!(grid, vec![vec![10, 10, 10], vec![10, 10, 10], vec![10, 10, 10]]);
+}
+
+#[test]
+fn linear_flashes() {
+    let mut grid = vec![vec![8, 8, 8, 8, 8, 9]];
+    for_grid(&mut grid, flash);
+    assert_eq!(grid, vec![vec![10, 10, 10, 10, 10, 10]]);
 }
 
 fn get_grid(pth: &str) -> Vec<Vec<u8>> {
