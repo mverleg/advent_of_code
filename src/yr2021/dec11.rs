@@ -26,31 +26,43 @@ struct Res {
 }
 
 fn run() -> u64 {
-    // Find id with highest total price
-    get_lines("data/2021/dec11.txt").into_iter()
-        .map(|line| {
-            let groups = RE.captures(&line).unwrap();
-            Res {
-                id: groups[1].parse().unwrap(),
-                price: groups[2].parse().unwrap(),
+    let mut grid = get_grid("data/2021/dec11.txt");
+    let mut flash_cnt = 0;
+
+    for t in 0 .. 100 {
+        // step 1 (increase) and 2a (flash)
+        for x in 0 .. grid.len() {
+            for y in 0 .. grid[0].len() {
+                grid[x][y] += 1;
+                flash(&mut grid, x, y)
             }
-        })
-        .into_group_map_by(|res| res.id)
-        .into_iter()
-        .map(|(k, v)| Res { id: k, price: v.iter().map(|res| res.price).sum() })
-        .inspect(|res| println!("item {} total price {}", res.id, res.price))
-        .sorted_by_key(|res| res.price)
-        .rev()
-        .find(|res| true)
-        .unwrap()
-        .id as u64
+        }
+
+        // step 2b (count flashes) and 3 (reset)
+        for x in 0 .. grid.len() {
+            for y in 0 .. grid[0].len() {
+                if grid[x][y] > 9 {
+                    flash_cnt += 1;
+                    grid[x][y] = 0
+                }
+            }
+        }
+    }
+
+    flash_cnt
 }
 
-fn get_lines(pth: &str) -> Vec<String> {
+fn flash(grid: &mut [Vec<u8>], x: usize, y: usize) {
+    unimplemented!()
+}
+
+fn get_grid(pth: &str) -> Vec<Vec<u8>> {
     let content = read_to_string(pth).unwrap();
     content
         .lines()
         .filter(|ln| !ln.trim().is_empty())
-        .map(|ln| ln.to_owned())
+        .map(|ln| ln.chars()
+            .map(|c| (c as u8) - ('0' as u8))
+            .collect::<Vec<_>>())
         .collect::<Vec<_>>()
 }
