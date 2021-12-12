@@ -5,6 +5,7 @@ use std::collections::HashSet;
 use ::itertools::Itertools;
 use ::lazy_static::lazy_static;
 use ::regex::Regex;
+use crate::yr2021::dec12::Cave::Start;
 
 lazy_static! {
     static ref RE: Regex = Regex::new(r"^([0-9]+)\s+([0-9]+)$").unwrap();
@@ -30,9 +31,25 @@ enum Cave {
 
 fn run() -> u64 {
     let deps = parse_deps();
-    dbg!(deps);
+    let small_caves_seen = HashSet::new();
+    count_paths(&deps, small_caves_seen, Cave::Start)
+}
 
-    unimplemented!()
+fn count_paths(deps: &HashMap<Cave, Vec<Cave>>, mut seen: HashSet<Cave>, cave: Cave) -> u64 {
+    match cave {
+        Cave::End => return 1,
+        Cave::Big(_) => (),
+        Cave::Start | Cave::Small(_) => {
+            if seen.contains(&cave) {
+                return 0
+            }
+            seen.insert(cave);
+        },
+    }
+    deps[&cave].iter()
+        .inspect(|dep| eprintln!("delegate to {:?}", dep))
+        .map(|dep| count_paths(deps, seen.clone(), dep.clone()))
+        .sum()
 }
 
 fn parse_deps() -> HashMap<Cave, Vec<Cave>> {
