@@ -7,12 +7,12 @@ use ::regex::Regex;
 use nom::combinator::map;
 
 pub fn part_a() {
-    let res = run();
+    let res = run1();
     println!("{}", res);
 }
 
 pub fn part_b() {
-    let res = run();
+    let res = run2();
     println!("{}", res);
 }
 
@@ -20,18 +20,30 @@ pub fn part_b() {
 enum Res {
     Ok,
     Err(char),
-    Incomplete,
+    Incomplete(Vec<char>),
 }
 
-fn run() -> u64 {
+fn run1() -> u64 {
     get_lines("data/2021/dec10.txt").into_iter()
         .map(|line| analyze(&line))
         .flat_map(|res| match res {
             Res::Ok => None,
-            Res::Err(c) => Some(c),
-            Res::Incomplete => None,
+            Res::Err(unexpected) => Some(unexpected),
+            Res::Incomplete(_) => None,
         }.into_iter())
-        .map(score_closer)
+        .map(score_error)
+        .sum()
+}
+
+fn run2() -> u64 {
+    get_lines("data/2021/dec10.txt").into_iter()
+        .map(|line| analyze(&line))
+        .flat_map(|res| match res {
+            Res::Ok => None,
+            Res::Err(_) => None,
+            Res::Incomplete(missing) => Some(missing),
+        }.into_iter())
+        .map(score_missing)
         .sum()
 }
 
@@ -43,7 +55,7 @@ fn analyze(inp: &Vec<char>) -> Res {
             close @ (')' | ']' | '}' | '>') => {
                 let open = match stack.pop() {
                     Some(open) => open,
-                    None => return Res::Incomplete
+                    None => panic!("too many closers, not supported"),
                 };
                 if find_closing(open) != *close {
                     return Res::Err(*close)
@@ -52,7 +64,19 @@ fn analyze(inp: &Vec<char>) -> Res {
             _ => panic!(),
         }
     }
-    Res::Ok
+    if stack.is_empty() {
+        Res::Ok
+    } else {
+        Res::Incomplete(close_stack(stack))
+    }
+}
+
+fn close_stack(mut pending: Vec<char>) -> Vec<char> {
+    let mut closers = vec![];
+    while let Some(open) = pending.pop() {
+        closers.push(find_closing(open))
+    }
+    closers
 }
 
 fn find_closing(open: char) -> char {
@@ -65,7 +89,7 @@ fn find_closing(open: char) -> char {
     }
 }
 
-fn score_closer(closer: char) -> u64 {
+fn score_error(closer: char) -> u64 {
     match closer {
         ')' => 3,
         ']' => 57,
@@ -73,6 +97,11 @@ fn score_closer(closer: char) -> u64 {
         '>' => 25137,
         _ => panic!(),
     }
+}
+
+fn score_missing(closers: Vec<char>) -> u64 {
+
+    unimplemented!()
 }
 
 fn get_lines(pth: &str) -> Vec<Vec<char>> {
