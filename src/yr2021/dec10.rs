@@ -36,7 +36,7 @@ fn run1() -> u64 {
 }
 
 fn run2() -> u64 {
-    get_lines("data/2021/dec10.txt").into_iter()
+    let scores = get_lines("data/2021/dec10.txt").into_iter()
         .map(|line| analyze(&line))
         .flat_map(|res| match res {
             Res::Ok => None,
@@ -44,7 +44,9 @@ fn run2() -> u64 {
             Res::Incomplete(missing) => Some(missing),
         }.into_iter())
         .map(score_missing)
-        .sum()
+        .sorted()
+        .collect::<Vec<_>>();
+    scores[scores.len() / 2]
 }
 
 fn analyze(inp: &Vec<char>) -> Res {
