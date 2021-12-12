@@ -100,8 +100,18 @@ fn score_error(closer: char) -> u64 {
 }
 
 fn score_missing(closers: Vec<char>) -> u64 {
-
-    unimplemented!()
+    let mut score = 0;
+    for closer in closers {
+        score *= 5;
+        score += match closer {
+            ')' => 1,
+            ']' => 2,
+            '}' => 3,
+            '>' => 4,
+            _ => panic!(),
+        }
+    }
+    score
 }
 
 fn get_lines(pth: &str) -> Vec<Vec<char>> {
