@@ -30,47 +30,62 @@ struct Res {
 fn run1() -> u64 {
     let mut grid = get_grid("data/2021/dec11.txt");
     let mut flash_cnt = 0;
+    print_grid(&mut grid);  //TODO @mark: TEMPORARY! REMOVE THIS!
 
     for t in 0 .. T {
         // step 1 (increase) and 2a (flash)
-        for x in 0 .. grid.len() {
-            for y in 0 .. grid[0].len() {
-                grid[x][y] += 1;
-                flash(&mut grid, x, y)
-            }
-        }
+        for_grid(&mut grid, |g, x, y| {
+            flash(g, x, y)
+        });
 
         // step 2b (count flashes) and 3 (reset)
-        for x in 0 .. grid.len() {
-            for y in 0 .. grid[0].len() {
-                if grid[x][y] > 9 {
-                    flash_cnt += 1;
-                    grid[x][y] = 0
-                }
+        for_grid_val(&mut grid, |val| {
+            if *val > 9 {
+                flash_cnt += 1;
+                *val = 0
             }
-        }
+        });
 
-        // print
-        for x in 0 .. grid.len() {
-            for y in 0..grid[0].len() {
-                print!("{} ", grid[x][y]);
-            }
-            println!("")
-        }
+        print_grid(&mut grid);  //TODO @mark: TEMPORARY! REMOVE THIS!
         dbg!(flash_cnt);
     }
 
     flash_cnt
 }
 
+fn for_grid(grid: &mut [Vec<u8>], mut op: impl FnMut(&mut [Vec<u8>], usize, usize)) {
+    for x in 0..grid.len() {
+        for y in 0..grid[0].len() {
+            op(grid, x, y)
+        }
+    }
+}
+
+fn for_grid_val(grid: &mut [Vec<u8>], mut op: impl FnMut(&mut u8)) {
+    for_grid(grid, |g, x, y| op(&mut g[x][y]))
+}
+
+fn print_grid(grid: &mut Vec<Vec<u8>>) {
+    // print
+    for x in 0..grid.len() {
+        for y in 0..grid[0].len() {
+            print!("{} ", grid[x][y]);
+        }
+        println!("")
+    }
+    println!("")
+}
+
 fn flash(grid: &mut [Vec<u8>], x: usize, y: usize) {
-    if grid[x][y] > 10 {
+    let value = &mut grid[x][y];
+    if *value > 10 {
         return
     }
-    grid[x][y] += 1;
-    if grid[x][y] <= 9 {
+    *value += 1;
+    if *value <= 9 {
         return
     }
+    eprintln!("flash {}, {} at {}", x, y, value);
     if x > 0 {
         flash(grid, x - 1, y);
         if y > 0 {
@@ -95,6 +110,18 @@ fn flash(grid: &mut [Vec<u8>], x: usize, y: usize) {
     if y < grid[0].len() - 1 {
         flash(grid, x, y + 1);
     }
+}
+
+#[test]
+fn simple_noflash() {
+    let mut grid = vec![vec![1, 2, 3], vec![4, 5, 6], vec![7, 8, 0]];
+    for_grid(&mut grid, flash);
+    assert_eq!(grid, vec![vec![2, 3, 4], vec![5, 6, 7], vec![8, 9, 1]]);
+}
+
+#[test]
+fn simple_flash() {
+    unimplemented!();  //TODO @mark
 }
 
 fn get_grid(pth: &str) -> Vec<Vec<u8>> {

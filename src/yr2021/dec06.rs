@@ -1,3 +1,6 @@
+
+/// Warning: there is a much easier apprach to solve this puzzle
+
 use ::std::cell::RefCell;
 use ::std::collections::HashMap;
 use ::std::fs::read_to_string;
@@ -59,60 +62,60 @@ fn count_fam_tree(cache: &mut HashMap<(u64, u64), u64>, day: u64, remaining: u64
 
 #[test]
 fn test1() {
-    assert_eq!(count_fam_tree(, 5, 3, "test"), 1);
+    assert_eq!(count_fam_tree(&mut HashMap::new(), 5, 3, "test"), 1);
 }
 
 #[test]
 fn test2() {
-    assert_eq!(count_fam_tree(, 1, 5, "test"), 2);
+    assert_eq!(count_fam_tree(&mut HashMap::new(), 1, 5, "test"), 2);
 }
 
 #[test]
 fn test3() {
-    assert_eq!(count_fam_tree(, 1, 11, "test"), 4);
+    assert_eq!(count_fam_tree(&mut HashMap::new(), 1, 11, "test"), 4);
 }
 
 #[test]
 fn test6() {
-    assert_eq!(count_fam_tree(, 0, 1, "test"), 2);
+    assert_eq!(count_fam_tree(&mut HashMap::new(), 0, 1, "test"), 2);
 }
 
 #[test]
 fn test7() {
     // new spawns only count next round (when current fish resets back to 6)
-    assert_eq!(count_fam_tree(, 1, 1, "test"), 1);
+    assert_eq!(count_fam_tree(&mut HashMap::new(), 1, 1, "test"), 1);
 }
 
 #[test]
 fn test8() {
     // new spawns only count next round (when current fish resets back to 6)
-    assert_eq!(count_fam_tree(, 0, 0, "test"), 1);
+    assert_eq!(count_fam_tree(&mut HashMap::new(), 0, 0, "test"), 1);
 }
 
 #[test]
 fn test9() {
     //TODO: verify answer
-    assert_eq!(count_fam_tree(, 0, 46, "test"), 71);
+    assert_eq!(count_fam_tree(&mut HashMap::new(), 0, 46, "test"), 71);
 }
 
 #[test]
 fn test_pzzl1() {
-    assert_eq!(count_fam_tree(, 1, 18, "test"), 7);
+    assert_eq!(count_fam_tree(&mut HashMap::new(), 1, 18, "test"), 7);
 }
 
 #[test]
 fn test_pzzl2() {
-    assert_eq!(count_fam_tree(, 2, 18, "test"), 5);
+    assert_eq!(count_fam_tree(&mut HashMap::new(), 2, 18, "test"), 5);
 }
 
 #[test]
 fn test_pzzl3() {
-    assert_eq!(count_fam_tree(, 3, 18, "test"), 5);
+    assert_eq!(count_fam_tree(&mut HashMap::new(), 3, 18, "test"), 5);
 }
 
 #[test]
 fn test_pzzl4() {
-    assert_eq!(count_fam_tree(, 4, 18, "test"), 4);
+    assert_eq!(count_fam_tree(&mut HashMap::new(), 4, 18, "test"), 4);
 }
 
 fn get_lines(pth: &str) -> Vec<String> {
