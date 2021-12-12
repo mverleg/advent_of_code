@@ -4,10 +4,7 @@ use ::std::fs::read_to_string;
 use ::itertools::Itertools;
 use ::lazy_static::lazy_static;
 use ::regex::Regex;
-
-lazy_static! {
-    static ref RE: Regex = Regex::new(r"^([0-9]+)\s+([0-9]+)$").unwrap();
-}
+use nom::combinator::map;
 
 pub fn part_a() {
     let res = run();
@@ -19,38 +16,44 @@ pub fn part_b() {
     println!("{}", res);
 }
 
-#[derive(Debug, Hash, PartialEq, Eq, PartialOrd, Ord, Clone)]
-struct Res {
-    id: u32,
-    price: u32,
+#[derive(Debug)]
+enum Res {
+    Ok,
+    Err(char),
+    Incomplete,
 }
 
 fn run() -> u64 {
-    // Find id with highest total price
     get_lines("data/2021/dec10.txt").into_iter()
-        .map(|line| {
-            let groups = RE.captures(&line).unwrap();
-            Res {
-                id: groups[1].parse().unwrap(),
-                price: groups[2].parse().unwrap(),
-            }
-        })
-        .into_group_map_by(|res| res.id)
-        .into_iter()
-        .map(|(k, v)| Res { id: k, price: v.iter().map(|res| res.price).sum() })
-        .inspect(|res| println!("item {} total price {}", res.id, res.price))
-        .sorted_by_key(|res| res.price)
-        .rev()
-        .find(|res| true)
-        .unwrap()
-        .id as u64
+        .map(|line| analyze(&line))
+        .flat_map(|res| match res {
+            Res::Ok => None,
+            Res::Err(c) => Some(c),
+            Res::Incomplete => None,
+        }.into_iter())
+        .map(score_closer)
+        .sum()
 }
 
-fn get_lines(pth: &str) -> Vec<String> {
+fn analyze(inp: &Vec<char>) -> Res {
+    unimplemented!()
+}
+
+fn score_closer(closer: char) -> u64 {
+    match closer {
+        ')' => 3,
+        ']' => 57,
+        '}' => 1197,
+        '>' => 25137,
+        _ => panic!(),
+    }
+}
+
+fn get_lines(pth: &str) -> Vec<Vec<char>> {
     let content = read_to_string(pth).unwrap();
     content
         .lines()
         .filter(|ln| !ln.trim().is_empty())
-        .map(|ln| ln.to_owned())
+        .map(|ln| ln.chars().collect::<Vec<_>>())
         .collect::<Vec<_>>()
 }

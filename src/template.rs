@@ -43,7 +43,9 @@ fn run() -> u64 {
         .rev()
         .find(|res| true)
         .unwrap()
-        .id as u64
+        .id as u64;
+
+    unimplemented!()
 }
 
 fn get_lines(pth: &str) -> Vec<String> {
