@@ -36,7 +36,33 @@ fn run() -> u64 {
 }
 
 fn analyze(inp: &Vec<char>) -> Res {
-    unimplemented!()
+    let mut stack = vec![];
+    for c in inp {
+        match c {
+            open @ ('(' | '[' | '{' | '<') => stack.push(*open),
+            close @ (')' | ']' | '}' | '>') => {
+                let open = match stack.pop() {
+                    Some(open) => open,
+                    None => return Res::Incomplete
+                };
+                if find_closing(open) != *close {
+                    return Res::Err(*close)
+                }
+            },
+            _ => panic!(),
+        }
+    }
+    Res::Ok
+}
+
+fn find_closing(open: char) -> char {
+    match open {
+        '(' => ')',
+        '[' => ']',
+        '{' => '}',
+        '<' => '>',
+        _ => panic!(),
+    }
 }
 
 fn score_closer(closer: char) -> u64 {
