@@ -6,16 +6,16 @@ use ::lazy_static::lazy_static;
 use ::regex::Regex;
 
 pub fn part_a() {
-    let res = run();
+    let res = run1();
     println!("{}", res);
 }
 
 pub fn part_b() {
-    let res = run();
+    let res = run2();
     println!("{}", res);
 }
 
-fn run() -> u64 {
+fn run1() -> u64 {
     let grid = get_grid("data/2021/dec09.txt");
     let mut minimum_scores = 0;
     for (x, row) in grid.iter().enumerate() {
@@ -28,6 +28,34 @@ fn run() -> u64 {
         }
     }
     minimum_scores
+}
+
+fn run2() -> u64 {
+    let grid = get_grid("data/2021/dec09.txt");
+    let mut basin_ids = vec![vec![0; grid[0].len()]; grid.len()];
+    let mut basin_sizes = vec![];
+    for (x, row) in grid.iter().enumerate() {
+        for (y, val) in row.iter().enumerate() {
+            if *val == 9 {
+                continue
+            }
+            if basin_ids[x][y] != 0 {
+                continue
+            }
+            let size = fill_basin(&grid, &mut basin_ids, x, y, basin_sizes.len());
+            basin_sizes.push(size);
+        }
+    }
+    assert!(basin_sizes.len() >= 3);
+    basin_sizes.iter()
+        .sorted()
+        .rev()
+        .take(3)
+        .product()
+}
+
+fn fill_basin(grid: &[Vec<u8>], basin_ids: &mut [Vec<i32>], x: usize, y: usize, id: usize) -> u64 {
+    unimplemented!()
 }
 
 fn get_grid(pth: &str) -> Vec<Vec<u8>> {
