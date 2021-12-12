@@ -7,5 +7,9 @@ pub mod dec05;
 pub mod dec06;
 pub mod dec07;
 pub mod dec08;
+pub mod dec09;
+pub mod dec10;
+pub mod dec11;
+pub mod dec12;
 
 
