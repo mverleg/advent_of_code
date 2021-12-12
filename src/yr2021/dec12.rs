@@ -1,23 +1,22 @@
 use ::std::collections::HashMap;
+use ::std::collections::HashSet;
 use ::std::fs::read_to_string;
-use std::collections::HashSet;
 
 use ::itertools::Itertools;
 use ::lazy_static::lazy_static;
 use ::regex::Regex;
-use crate::yr2021::dec12::Cave::Start;
 
 lazy_static! {
     static ref RE: Regex = Regex::new(r"^([0-9]+)\s+([0-9]+)$").unwrap();
 }
 
 pub fn part_a() {
-    let res = run();
+    let res = run(false);
     println!("{}", res);
 }
 
 pub fn part_b() {
-    let res = run();
+    let res = run(true);
     println!("{}", res);
 }
 
@@ -29,26 +28,38 @@ enum Cave {
     Small(usize),
 }
 
-fn run() -> u64 {
+fn run(allow_one_duplicate: bool) -> u64 {
     let deps = parse_deps();
     let small_caves_seen = HashSet::new();
-    count_paths(&deps, small_caves_seen, Cave::Start)
+    count_paths(&deps, small_caves_seen, allow_one_duplicate, Cave::Start)
 }
 
-fn count_paths(deps: &HashMap<Cave, Vec<Cave>>, mut seen: HashSet<Cave>, cave: Cave) -> u64 {
+fn count_paths(deps: &HashMap<Cave, Vec<Cave>>, mut seen: HashSet<Cave>, mut duplicate_remaining: bool, cave: Cave) -> u64 {
     match cave {
-        Cave::End => return 1,
-        Cave::Big(_) => (),
-        Cave::Start | Cave::Small(_) => {
+        Cave::Start => {
             if seen.contains(&cave) {
                 return 0
+            } else {
+                seen.insert(cave);
             }
-            seen.insert(cave);
+        },
+        Cave::End => return 1,
+        Cave::Big(_) => (),
+        Cave::Small(_) => {
+            if seen.contains(&cave) {
+                if duplicate_remaining {
+                    duplicate_remaining = false;
+                } else {
+                    return 0
+                }
+            } else {
+                seen.insert(cave);
+            }
         },
     }
     deps[&cave].iter()
-        .inspect(|dep| eprintln!("delegate to {:?}", dep))
-        .map(|dep| count_paths(deps, seen.clone(), dep.clone()))
+        //.inspect(|dep| eprintln!("delegate to {:?}", dep))
+        .map(|dep| count_paths(deps, seen.clone(), duplicate_remaining, dep.clone()))
         .sum()
 }
 
