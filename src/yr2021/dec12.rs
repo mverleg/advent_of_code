@@ -1,5 +1,6 @@
 use ::std::collections::HashMap;
 use ::std::fs::read_to_string;
+use std::collections::HashSet;
 
 use ::itertools::Itertools;
 use ::lazy_static::lazy_static;
@@ -19,31 +20,48 @@ pub fn part_b() {
     println!("{}", res);
 }
 
-#[derive(Debug, Hash, PartialEq, Eq, PartialOrd, Ord, Clone)]
-struct Res {
-    id: u32,
-    price: u32,
+#[derive(Debug, Hash, PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]
+enum Cave {
+    Start,
+    End,
+    Big(usize),
+    Small(usize),
 }
 
 fn run() -> u64 {
-    // Find id with highest total price
-    get_lines("data/2021/dec12.txt").into_iter()
-        .map(|line| {
-            let groups = RE.captures(&line).unwrap();
-            Res {
-                id: groups[1].parse().unwrap(),
-                price: groups[2].parse().unwrap(),
+    let deps = parse_deps();
+    dbg!(deps);
+
+    unimplemented!()
+}
+
+fn parse_deps() -> HashMap<Cave, Vec<Cave>> {
+    let mut cave_ids = HashMap::new();
+    let mut deps = HashMap::new();
+    for line in get_lines("data/2021/dec12.txt") {
+        let (left, right) = line.split_once("-").unwrap();
+        let left = map_cave(&mut cave_ids, left);
+        let right = map_cave(&mut cave_ids, right);
+        deps.entry(left).or_insert_with(|| vec![]).push(right);
+        deps.entry(right).or_insert_with(|| vec![]).push(left);
+    }
+    deps
+}
+
+fn map_cave(cave_ids: &mut HashMap<String, usize>, cave_name: &str) -> Cave {
+    let next_id = cave_ids.len();
+    let id = *cave_ids.entry(cave_name.to_owned()).or_insert(next_id);
+    match cave_name {
+        "start" => Cave::Start,
+        "end" => Cave::End,
+        general => {
+            if general.to_lowercase() == general {
+                Cave::Small(id)
+            } else {
+                Cave::Big(id)
             }
-        })
-        .into_group_map_by(|res| res.id)
-        .into_iter()
-        .map(|(k, v)| Res { id: k, price: v.iter().map(|res| res.price).sum() })
-        .inspect(|res| println!("item {} total price {}", res.id, res.price))
-        .sorted_by_key(|res| res.price)
-        .rev()
-        .find(|res| true)
-        .unwrap()
-        .id as u64
+        },
+    }
 }
 
 fn get_lines(pth: &str) -> Vec<String> {
