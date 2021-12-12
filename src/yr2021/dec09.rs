@@ -20,8 +20,8 @@ fn run1() -> u64 {
     let mut minimum_scores = 0;
     for (x, row) in grid.iter().enumerate() {
         for (y, val) in row.iter().enumerate() {
-            let is_hor_min = (y == 0 || val < &row[y - 1]) && (y == row.len() - 1 || val < &row[y + 1]);
-            let is_ver_min = (x == 0 || val < &grid[x - 1][y]) && (x == grid.len() - 1 || val < &grid[x + 1][y]);
+            let is_ver_min = (y == 0 || val < &row[y - 1]) && (y == row.len() - 1 || val < &row[y + 1]);
+            let is_hor_min = (x == 0 || val < &grid[x - 1][y]) && (x == grid.len() - 1 || val < &grid[x + 1][y]);
             if is_hor_min && is_ver_min {
                 minimum_scores += 1 + (*val as u64)
             }
@@ -42,7 +42,8 @@ fn run2() -> u64 {
             if basin_ids[x][y] != 0 {
                 continue
             }
-            let size = fill_basin(&grid, &mut basin_ids, x, y, basin_sizes.len());
+            let next_basin_id = basin_sizes.len() + 1;
+            let size = fill_basin(&grid, &mut basin_ids, x, y, next_basin_id);
             basin_sizes.push(size);
         }
     }
@@ -54,8 +55,24 @@ fn run2() -> u64 {
         .product()
 }
 
-fn fill_basin(grid: &[Vec<u8>], basin_ids: &mut [Vec<i32>], x: usize, y: usize, id: usize) -> u64 {
-    unimplemented!()
+fn fill_basin(grid: &[Vec<u8>], basin_ids: &mut [Vec<usize>], x: usize, y: usize, id: usize) -> u64 {
+    eprintln!("{}, {} = {}", x, y, id);  //TODO @mark: TEMPORARY! REMOVE THIS!
+    if basin_ids[x][y] != 0 {
+        return 0;
+    }
+    if grid[x][y] == 9 {
+        return 0;
+    }
+    basin_ids[x][y] = id;
+    let mut size = 0;
+    if x > 0 {
+        size += fill_basin(grid, basin_ids, x - 1, y, id);
+    }
+    if x < grid.len() - 1 {
+        size += fill_basin(grid, basin_ids, x + 1, y, id);
+    }
+    unimplemented!();
+    size + 1
 }
 
 fn get_grid(pth: &str) -> Vec<Vec<u8>> {
