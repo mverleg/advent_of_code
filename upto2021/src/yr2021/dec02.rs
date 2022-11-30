@@ -60,7 +60,7 @@ struct Res {
 }
 
 fn get_lines() -> Vec<String> {
-    let content = read_to_string("data/2021/dec02.txt").unwrap();
+    let content = read_to_string("../../data/2021/dec02.txt").unwrap();
     content
         .lines()
         .filter(|ln| !ln.trim().is_empty())

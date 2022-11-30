@@ -13,7 +13,7 @@ pub fn dec06b() {
 }
 
 fn run(group_counter: fn(&[&str]) -> u64) -> u64 {
-    read_to_string("data/2020/dec06.txt")
+    read_to_string("../../data/2020/dec06.txt")
         .unwrap()
         .lines()
         .collect::<Vec<_>>()

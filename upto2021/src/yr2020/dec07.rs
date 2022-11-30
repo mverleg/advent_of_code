@@ -47,7 +47,7 @@ pub fn part_a() {
 }
 
 pub fn part_b() {
-    let content = read_to_string("data/2020/dec07.txt").unwrap();
+    let content = read_to_string("../../data/2020/dec07.txt").unwrap();
     let bags = lines(&content).into_iter()
         //.inspect(|(outer, inner)| println!("{:?}", outer))
         .collect::<HashMap<Bag, Vec<(u32, Bag)>>>();

@@ -19,7 +19,7 @@ pub fn dec01b() {
 }
 
 fn run(slide: bool) -> u64 {
-    let mut depths = read_to_string("data/2021/dec01.txt")
+    let mut depths = read_to_string("../../data/2021/dec01.txt")
         .unwrap()
         .lines()
         .filter(|ln| !ln.trim().is_empty())
