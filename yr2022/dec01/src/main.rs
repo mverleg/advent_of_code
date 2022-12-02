@@ -1,6 +1,6 @@
 use ::std::fs::read_to_string;
 
-// 6:44
+//
 
 fn main() {
     let data = read_to_string("data.txt").unwrap();
