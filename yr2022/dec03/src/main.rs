@@ -2,8 +2,9 @@
 
 use ::std::fs::read_to_string;
 use std::collections::HashSet;
+use itertools::Itertools;
 
-//
+// time? ~15-20 min
 
 fn main() {
     let data = read_to_string("data.txt").unwrap();
@@ -12,14 +13,6 @@ fn main() {
 }
 
 fn part_a(data: &str) -> usize {
-    run(data, false)
-}
-
-fn part_b(data: &str) -> usize {
-    run(data, true)
-}
-
-fn run(data: &str, is_b: bool) -> usize {
     let mut prio = 0;
     for line in data.lines() {
         let (left, right) = line.split_at(line.len() / 2);
@@ -33,6 +26,28 @@ fn run(data: &str, is_b: bool) -> usize {
                     l => todo!("invalid: {l}"),
                 };
                 //eprintln!("{p}");
+                prio += p
+            }
+        }
+    }
+    prio
+}
+
+fn part_b(data: &str) -> usize {
+    let mut prio = 0;
+    for mut group_lines in &data.lines().chunks(3) {
+        //let l = group_lines.into_iter().collect::<[&str; 3]>();
+        let first = group_lines.next().unwrap().chars().collect::<HashSet<char>>();
+        let middle = group_lines.next().unwrap().chars().collect::<HashSet<char>>();
+        let last = group_lines.next().unwrap().chars().collect::<HashSet<char>>();
+        for item in first {
+            if middle.contains(&item) && last.contains(&item) {
+                let p = match item {
+                    'a'..='z' => to_nr(item) - to_nr('a') + 1,
+                    'A'..='Z' => to_nr(item) - to_nr('A') + 26 + 1,
+                    l => todo!("invalid: {l}"),
+                };
+                eprintln!("> {p}");
                 prio += p
             }
         }
