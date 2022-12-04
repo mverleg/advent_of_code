@@ -26,6 +26,10 @@ impl Section {
     fn contains(&self, other: &Section) -> bool {
         other.start >= self.start && other.end <= self.end
     }
+
+    fn overlaps(&self, other: &Section) -> bool {
+        other.start >= self.start && other.start <= self.end
+    }
 }
 
 fn part_a(data: &str) -> usize {
@@ -42,8 +46,14 @@ fn run(data: &str, is_b: bool) -> usize {
         let (left, right) = line.split_once(",").unwrap();
         let left = Section::parse(left);
         let right = Section::parse(right);
-        if left.contains(&right) || right.contains(&left) {
-            count += 1;
+        if is_b {
+            if left.overlaps(&right) || right.overlaps(&left) {
+                count += 1;
+            }
+        } else {
+            if left.contains(&right) || right.contains(&left) {
+                count += 1;
+            }
         }
     }
     count
