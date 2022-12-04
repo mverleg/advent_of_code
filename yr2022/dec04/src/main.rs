@@ -16,7 +16,7 @@ struct Section {
 
 impl Section {
     fn parse(text: &str) -> Self {
-        let (start, end) = text.split_once(",").unwrap();
+        let (start, end) = text.split_once("-").unwrap();
         Section {
             start: start.parse().unwrap(),
             end: end.parse().unwrap(),
@@ -40,7 +40,9 @@ fn run(data: &str, is_b: bool) -> usize {
     let mut count = 0;
     for line in data.lines() {
         let (left, right) = line.split_once(",").unwrap();
-        if left.contains(right) || right.contains(left) {
+        let left = Section::parse(left);
+        let right = Section::parse(right);
+        if left.contains(&right) || right.contains(&left) {
             count += 1;
         }
     }
