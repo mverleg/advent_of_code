@@ -1,7 +1,7 @@
 use ::std::fs::read_to_string;
 use std::collections::VecDeque;
 
-//
+// ~23:15
 
 fn main() {
     let data = read_to_string("data.txt").unwrap();
@@ -42,17 +42,29 @@ fn run(data: &str, is_b: bool) -> String {
             }
         }
     }
-    dbg!(&stacks);
     // Parse/do operations
     while let Some(line) = rev_lines.pop() {
         let parts = line.split(' ').collect::<Vec<_>>();
         let amt: usize = parts[1].parse().unwrap();
         let from = parts[3].parse::<usize>().unwrap() - 1usize;
         let to = parts[5].parse::<usize>().unwrap() - 1usize;
-        for _ in 0 .. amt {
-            let val = stacks[from].pop_back().unwrap();
-            stacks[to].push_back(val);
-            println!("{from} -> {to}")
+        if ! is_b {
+            for _ in 0..amt {
+                let val = stacks[from].pop_back().unwrap();
+                stacks[to].push_back(val);
+                //println!("{from} -> {to}")
+            }
+        } else {
+            let mut moving = vec![];
+            for _ in 0..amt {
+                let val = stacks[from].pop_back().unwrap();
+                moving.push(val);
+                //println!("{from} -> {to}")
+            }
+            moving.reverse();
+            for val in moving {
+                stacks[to].push_back(val);
+            }
         }
     }
     let mut result = String::new();
