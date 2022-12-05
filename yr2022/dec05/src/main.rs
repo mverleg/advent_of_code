@@ -9,17 +9,16 @@ fn main() {
     println!("{}", part_b(&data));
 }
 
-fn part_a(data: &str) -> usize {
+fn part_a(data: &str) -> String {
     run(data, false)
 }
 
-fn part_b(data: &str) -> usize {
+fn part_b(data: &str) -> String {
     run(data, true)
 }
 
-fn run(data: &str, is_b: bool) -> usize {
+fn run(data: &str, is_b: bool) -> String {
     let mut stacks: Vec<VecDeque<char>> = vec![];
-    let mut res = 0;
     let mut rev_lines = data.lines().rev().collect::<Vec<_>>();
     // Parse stacks
     while let Some(line) = rev_lines.pop() {
@@ -33,6 +32,9 @@ fn run(data: &str, is_b: bool) -> usize {
                 if *c == '1' {
                     break
                 }
+                if *c == ' ' {
+                    continue
+                }
                 while stacks.len() <= n {
                     stacks.push(VecDeque::new())
                 }
@@ -40,14 +42,26 @@ fn run(data: &str, is_b: bool) -> usize {
             }
         }
     }
+    dbg!(&stacks);
     // Parse/do operations
     while let Some(line) = rev_lines.pop() {
         let parts = line.split(' ').collect::<Vec<_>>();
-        let stack_nr: usize = parts[1].parse().unwrap();
-        let from: usize = parts[3].parse().unwrap();
-        let to: usize = parts[5].parse().unwrap();
-
-        println!("{stack_nr}: {from} -> {to}")
+        let amt: usize = parts[1].parse().unwrap();
+        let from = parts[3].parse::<usize>().unwrap() - 1usize;
+        let to = parts[5].parse::<usize>().unwrap() - 1usize;
+        for _ in 0 .. amt {
+            let val = stacks[from].pop_back().unwrap();
+            stacks[to].push_back(val);
+            println!("{from} -> {to}")
+        }
     }
-    res
+    let mut result = String::new();
+    for mut stack in stacks {
+        if let Some(val) = stack.pop_back() {
+            result.push(val)
+        } else {
+            eprintln!("empty stack")
+        }
+    }
+    result
 }
