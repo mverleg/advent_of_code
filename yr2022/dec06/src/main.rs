@@ -11,25 +11,24 @@ fn main() {
 
 
 fn part_a(data: &str) -> usize {
-    run(data, false)
+    run(data, 4)
 }
 
 fn part_b(data: &str) -> usize {
-    run(data, true)
+    run(data, 14)
 }
 
-fn run(data: &str, is_b: bool) -> usize {
-    let mut res = 0;
+fn run(data: &str, marker_len: usize) -> usize {
     let chars = data.chars().collect::<Vec<_>>();
-    for i in 3..chars.len() {
-        let mut last4 = HashSet::new();
-        last4.insert(chars[i - 3]);
-        last4.insert(chars[i - 2]);
-        last4.insert(chars[i - 1]);
-        last4.insert(chars[i]);
-        if last4.len() == 4 {
+    for i in marker_len-1..chars.len() {
+        let mut last = HashSet::new();
+        for j in 0 .. marker_len {
+            //eprintln!("{i} {j}");
+            last.insert(chars[i - j]);
+        }
+        if last.len() == marker_len {
             return i + 1;
         }
     }
-    todo!()
+    panic!("no marker")
 }
