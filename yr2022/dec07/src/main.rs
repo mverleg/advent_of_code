@@ -1,4 +1,5 @@
 use ::std::fs::read_to_string;
+use std::cmp::min;
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 use itertools::Itertools;
@@ -22,14 +23,18 @@ fn part_a(data: &str) -> usize {
 
 fn part_b(data: &str) -> usize {
     let dir_total_sizes = get_dir_sizes(data);
+    dbg!(&dir_total_sizes);
     let space_use = *dir_total_sizes.get("/").expect("no root");
     assert!(space_use < 70000000);
-    let space_need = 70000000 - space_use;
-    dir_total_sizes.into_iter()
+    let space_need = min(30000000, 70000000 - space_use);
+    println!("use: {space_use}; need: {space_need}");
+    let mut large_enough_sizes = dir_total_sizes.into_iter()
         .map(|(_, size)| size)
         .filter(|size| *size >= space_need)
-        .sorted()
-        .next().expect("no match")
+        .collect::<Vec<_>>();
+    large_enough_sizes.sort();
+    dbg!(&large_enough_sizes);
+    large_enough_sizes[0]
 }
 
 fn get_dir_sizes(data: &str) -> HashMap<String, usize> {
