@@ -4,12 +4,13 @@ use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 use itertools::Itertools;
 
-//
+// 33:35 :(
 
 fn main() {
     let data = read_to_string("data.txt").unwrap();
     println!("{}", part_a(&data));
     println!("{}", part_b(&data));
+    // wrong: 41609574 (root), 21756443
 }
 
 
@@ -23,10 +24,14 @@ fn part_a(data: &str) -> usize {
 
 fn part_b(data: &str) -> usize {
     let dir_total_sizes = get_dir_sizes(data);
-    dbg!(&dir_total_sizes);
     let space_use = *dir_total_sizes.get("/").expect("no root");
     assert!(space_use < 70000000);
-    let space_need = min(30000000, 70000000 - space_use);
+    let space_avail = 70000000 - space_use;
+    let space_need = if space_avail < 30000000 {
+        30000000 - space_avail
+    } else {
+        30000000
+    };
     println!("use: {space_use}; need: {space_need}");
     let mut large_enough_sizes = dir_total_sizes.into_iter()
         .map(|(_, size)| size)
@@ -60,7 +65,7 @@ fn get_dir_sizes(data: &str) -> HashMap<String, usize> {
             }
         } else {
             if line.starts_with("dir") {
-                continue
+                continue  // do nothing
             }
             assert!(line.chars().next().unwrap().is_digit(10), "not digit: {line}");
             let (size, _) = line.split_once(' ').expect("expected space in dir listing entry");
