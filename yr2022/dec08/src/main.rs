@@ -28,7 +28,36 @@ fn run(data: &str, is_b: bool) -> usize {
                 *col = 0;
             }
         }
+        let mut highest = 0;
+        for col in row.iter_mut().rev() {
+            if *col > highest {
+                highest = *col;
+                vis_cnt += 1;
+                *col = 0;
+            }
+        }
     }
+    for j in 0 .. grid[0].len() {
+        let mut highest = 0;
+        for i in 0 .. grid.len() {
+            let val = &mut grid[i][j];
+            if *val > highest {
+                highest = *val;
+                vis_cnt += 1;
+                *val = 0;
+            }
+        }
+        let mut highest = 0;
+        for i in (0 .. grid.len()).rev() {
+            let val = &mut grid[i][j];
+            if *val > highest {
+                highest = *val;
+                vis_cnt += 1;
+                *val = 0;
+            }
+        }
+    }
+    dbg!(&grid);  //TODO @mark: TEMPORARY! REMOVE THIS!
     eprintln!("vis_cnt={vis_cnt}");
     todo!()
 }
