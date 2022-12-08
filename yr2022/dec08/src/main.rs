@@ -18,22 +18,31 @@ fn part_b(data: &str) -> usize {
 
 fn run(data: &str, is_b: bool) -> usize {
     let mut grid = parse_grid(data);
+    let mut seen = vec![vec![false; grid[0].len()]; grid.len()];
     let mut vis_cnt = 0;
-    for row in grid.iter_mut() {
+    for (i, row) in grid.iter().enumerate() {
         let mut highest = 0;
-        for col in row.iter_mut() {
+        for (j, col) in row.iter().enumerate() {
             if *col > highest {
                 highest = *col;
-                vis_cnt += 1;
-                *col = 0;
+                if !seen[i][j] {
+                    vis_cnt += 1;
+                    seen[i][j] = true;
+                }
+            } else {
+                break
             }
         }
         let mut highest = 0;
-        for col in row.iter_mut().rev() {
+        for (j, col) in row.iter().enumerate().rev() {
             if *col > highest {
                 highest = *col;
-                vis_cnt += 1;
-                *col = 0;
+                if !seen[i][j] {
+                    vis_cnt += 1;
+                    seen[i][j] = true;
+                }
+            } else {
+                break
             }
         }
     }
@@ -43,8 +52,12 @@ fn run(data: &str, is_b: bool) -> usize {
             let val = &mut grid[i][j];
             if *val > highest {
                 highest = *val;
-                vis_cnt += 1;
-                *val = 0;
+                if !seen[i][j] {
+                    vis_cnt += 1;
+                    seen[i][j] = true;
+                }
+            } else {
+                break
             }
         }
         let mut highest = 0;
@@ -52,12 +65,17 @@ fn run(data: &str, is_b: bool) -> usize {
             let val = &mut grid[i][j];
             if *val > highest {
                 highest = *val;
-                vis_cnt += 1;
-                *val = 0;
+                if !seen[i][j] {
+                    vis_cnt += 1;
+                    seen[i][j] = true;
+                }
+            } else {
+                break
             }
         }
     }
     dbg!(&grid);  //TODO @mark: TEMPORARY! REMOVE THIS!
+    dbg!(&seen);  //TODO @mark: TEMPORARY! REMOVE THIS!
     eprintln!("vis_cnt={vis_cnt}");
     todo!()
 }
