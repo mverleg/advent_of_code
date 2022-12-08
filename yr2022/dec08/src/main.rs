@@ -36,6 +36,7 @@ fn run(data: &str, is_b: bool) -> usize {
         let mut highest = 0;
         for (j, col) in row.iter().enumerate().rev() {
             if *col > highest {
+                eprintln!("{i},{j}: {}", *col - 1);
                 highest = *col;
                 if !seen[i][j] {
                     vis_cnt += 1;
@@ -74,8 +75,18 @@ fn run(data: &str, is_b: bool) -> usize {
             }
         }
     }
-    dbg!(&grid);  //TODO @mark: TEMPORARY! REMOVE THIS!
-    dbg!(&seen);  //TODO @mark: TEMPORARY! REMOVE THIS!
+    // dbg!(&grid);  //TODO @mark: TEMPORARY! REMOVE THIS!
+    for row in seen.iter() {
+        for cell in row.iter() {
+            if *cell {
+                eprint!(".");
+            } else {
+                eprint!("X");
+            }
+        }
+        eprintln!("");
+    }
+    //dbg!(&seen);  //TODO @mark: TEMPORARY! REMOVE THIS!
     eprintln!("vis_cnt={vis_cnt}");
     todo!()
 }
