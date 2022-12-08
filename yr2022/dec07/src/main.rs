@@ -1,8 +1,6 @@
+use ::std::collections::hash_map::Entry;
+use ::std::collections::HashMap;
 use ::std::fs::read_to_string;
-use std::cmp::min;
-use std::collections::hash_map::Entry;
-use std::collections::HashMap;
-use itertools::Itertools;
 
 // 33:35 :(
 
@@ -32,13 +30,11 @@ fn part_b(data: &str) -> usize {
     } else {
         30000000
     };
-    println!("use: {space_use}; need: {space_need}");
     let mut large_enough_sizes = dir_total_sizes.into_iter()
         .map(|(_, size)| size)
         .filter(|size| *size >= space_need)
         .collect::<Vec<_>>();
     large_enough_sizes.sort();
-    dbg!(&large_enough_sizes);
     large_enough_sizes[0]
 }
 
