@@ -79,45 +79,52 @@ fn part_b(data: &str) -> usize {
             let mut scenic: usize = 1;
             let start = grid[a][b];
 
+            eprint!("{a},{b} ({}): ", start - 1);
             let mut vis_cnt = 0;
-            for i in 0..a-1 {
-                let val = &mut grid[i][b];
-                if *val >= start {
-                    break
-                }
+            for i in (0..a).rev() {
+                let val = grid[i][b];
+                eprint!("{i}{b}{val} ");
                 vis_cnt += 1;
+                if val >= start {
+                    break;
+                }
             }
             scenic *= vis_cnt;
+            eprint!("[{vis_cnt}] ");
 
             let mut vis_cnt = 0;
-            for i in a+1..grid.len() {
-                let val = &mut grid[i][b];
-                if *val >= start {
-                    break
-                }
+            for i in (a + 1)..grid.len() {
+                let val = grid[i][b];
+                eprint!("{i}{b}{val} ");
                 vis_cnt += 1;
+                if val >= start {
+                    break;
+                }
             }
             scenic *= vis_cnt;
+            eprint!("[{vis_cnt}] ");
 
             let mut vis_cnt = 0;
-            for j in 0..b-1 {
-                let val = &mut grid[a][j];
-                if *val >= start {
-                    break
-                }
+            for j in (0..b).rev() {
+                let val = grid[a][j];
                 vis_cnt += 1;
+                if val >= start {
+                    break;
+                }
             }
             scenic *= vis_cnt;
+            eprint!("[{vis_cnt}] ");
 
             let mut vis_cnt = 0;
-            for j in b+1..grid[0].len() {
-                let val = &mut grid[a][j];
-                if *val >= start {
-                    break
-                }
+            for j in (b + 1)..grid[0].len() {
+                let val = grid[a][j];
                 vis_cnt += 1;
+                if val >= start {
+                    break;
+                }
             }
             scenic *= vis_cnt;
+            eprintln!("[{vis_cnt}] -> {scenic}");
 
             if scenic > highest_scenic.0 {
                 eprintln!("update {} -> {scenic}", highest_scenic.0);  //TODO @mark: TEMPORARY! REMOVE THIS!
