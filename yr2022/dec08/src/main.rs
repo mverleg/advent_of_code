@@ -1,6 +1,6 @@
 use ::std::fs::read_to_string;
 
-//
+// didn't measure time, many interruptions
 
 fn main() {
     let data = read_to_string("data.txt").unwrap();
@@ -22,34 +22,29 @@ fn run(data: &str, is_b: bool) -> usize {
     let mut vis_cnt = 0;
     for (i, row) in grid.iter().enumerate() {
         let mut highest = 0;
-        for (j, col) in row.iter().enumerate() {
-            if *col > highest {
-                highest = *col;
+        for (j, val) in row.iter().enumerate() {
+            if *val > highest {
+                highest = *val;
                 if !seen[i][j] {
                     vis_cnt += 1;
                     seen[i][j] = true;
                 }
-            } else {
-                break
             }
         }
         let mut highest = 0;
-        for (j, col) in row.iter().enumerate().rev() {
-            if *col > highest {
-                eprintln!("{i},{j}: {}", *col - 1);
-                highest = *col;
+        for (j, val) in row.iter().enumerate().rev() {
+            if *val > highest {
+                highest = *val;
                 if !seen[i][j] {
                     vis_cnt += 1;
                     seen[i][j] = true;
                 }
-            } else {
-                break
             }
         }
     }
     for j in 0 .. grid[0].len() {
         let mut highest = 0;
-        for i in 0 .. grid.len() {
+        for i in 0..grid.len() {
             let val = &mut grid[i][j];
             if *val > highest {
                 highest = *val;
@@ -57,12 +52,10 @@ fn run(data: &str, is_b: bool) -> usize {
                     vis_cnt += 1;
                     seen[i][j] = true;
                 }
-            } else {
-                break
             }
         }
         let mut highest = 0;
-        for i in (0 .. grid.len()).rev() {
+        for i in (0..grid.len()).rev() {
             let val = &mut grid[i][j];
             if *val > highest {
                 highest = *val;
@@ -70,12 +63,9 @@ fn run(data: &str, is_b: bool) -> usize {
                     vis_cnt += 1;
                     seen[i][j] = true;
                 }
-            } else {
-                break
             }
         }
     }
-    // dbg!(&grid);  //TODO @mark: TEMPORARY! REMOVE THIS!
     for row in seen.iter() {
         for cell in row.iter() {
             if *cell {
@@ -86,9 +76,7 @@ fn run(data: &str, is_b: bool) -> usize {
         }
         eprintln!("");
     }
-    //dbg!(&seen);  //TODO @mark: TEMPORARY! REMOVE THIS!
-    eprintln!("vis_cnt={vis_cnt}");
-    todo!()
+    vis_cnt
 }
 
 fn parse_grid(data: &str) -> Vec<Vec<usize>> {
