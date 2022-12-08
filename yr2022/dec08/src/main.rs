@@ -4,7 +4,7 @@ use ::std::fs::read_to_string;
 
 fn main() {
     let data = read_to_string("data.txt").unwrap();
-    //println!("{}", part_a(&data));
+    println!("{}", part_a(&data));
     println!("{}", part_b(&data));
 }
 
@@ -72,37 +72,37 @@ fn part_a(data: &str) -> usize {
 }
 
 fn part_b(data: &str) -> usize {
-    let mut grid = parse_grid(data);
+    let grid = parse_grid(data);
     let mut highest_scenic = (0, 0, 0);
     for a in 1..grid.len() - 1 {
         for b in 1..grid[0].len() - 1 {
             let mut scenic: usize = 1;
             let start = grid[a][b];
 
-            eprint!("{a},{b} ({}): ", start - 1);
+            // eprint!("{a},{b} ({}): ", start - 1);
             let mut vis_cnt = 0;
             for i in (0..a).rev() {
                 let val = grid[i][b];
-                eprint!("{i}{b}{val} ");
+                // eprint!("{i}{b}{val} ");
                 vis_cnt += 1;
                 if val >= start {
                     break;
                 }
             }
             scenic *= vis_cnt;
-            eprint!("[{vis_cnt}] ");
+            // eprint!("[{vis_cnt}] ");
 
             let mut vis_cnt = 0;
             for i in (a + 1)..grid.len() {
                 let val = grid[i][b];
-                eprint!("{i}{b}{val} ");
+                // eprint!("{i}{b}{val} ");
                 vis_cnt += 1;
                 if val >= start {
                     break;
                 }
             }
             scenic *= vis_cnt;
-            eprint!("[{vis_cnt}] ");
+            // eprint!("[{vis_cnt}] ");
 
             let mut vis_cnt = 0;
             for j in (0..b).rev() {
@@ -113,7 +113,7 @@ fn part_b(data: &str) -> usize {
                 }
             }
             scenic *= vis_cnt;
-            eprint!("[{vis_cnt}] ");
+            // eprint!("[{vis_cnt}] ");
 
             let mut vis_cnt = 0;
             for j in (b + 1)..grid[0].len() {
@@ -124,15 +124,14 @@ fn part_b(data: &str) -> usize {
                 }
             }
             scenic *= vis_cnt;
-            eprintln!("[{vis_cnt}] -> {scenic}");
+            // eprintln!("[{vis_cnt}] -> {scenic}");
 
             if scenic > highest_scenic.0 {
-                eprintln!("update {} -> {scenic}", highest_scenic.0);  //TODO @mark: TEMPORARY! REMOVE THIS!
+                //eprintln!("update {} -> {scenic}", highest_scenic.0);  //TODO @mark: TEMPORARY! REMOVE THIS!
                 highest_scenic = (scenic, a, b);
             }
         }
     }
-    assert!(highest_scenic.0 >= 0);
     eprintln!("{} for {},{}", highest_scenic.0, highest_scenic.1, highest_scenic.2);
     highest_scenic.0 as usize
 }
