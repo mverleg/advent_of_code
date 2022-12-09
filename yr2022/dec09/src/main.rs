@@ -1,7 +1,7 @@
 use ::std::fs::read_to_string;
 use std::collections::HashSet;
 
-//
+// 35:11
 
 fn main() {
     let data = read_to_string("data.txt").unwrap();
