@@ -10,14 +10,14 @@ fn main() {
 }
 
 fn part_a(data: &str) -> usize {
-    run(data, false)
+    run(data, 1)
 }
 
 fn part_b(data: &str) -> usize {
-    run(data, true)
+    run(data, 9)
 }
 
-fn run(data: &str, is_b: bool) -> usize {
+fn run(data: &str, lag_steps: i32) -> usize {
     let mut head = (0i32, 0i32);
     let mut tail = (0i32, 0i32);
     let mut seen = HashSet::new();
@@ -32,13 +32,13 @@ fn run(data: &str, is_b: bool) -> usize {
                 "D" => head.1 -= 1,
                 _ => panic!("unknown direction"),
             }
-            if head.0 > tail.0 + 1 {
+            if head.0 > tail.0 + lag_steps {
                 tail = (tail.0 + 1, tail.1 + (head.1 - tail.1).signum());
             } else if head.0 < tail.0 - 1 {
-                tail = (tail.0 - 1, tail.1 + (head.1 - tail.1).signum());
-            } else if head.1 > tail.1 + 1 {
+                tail = (tail.0 - lag_steps, tail.1 + (head.1 - tail.1).signum());
+            } else if head.1 > tail.1 + lag_steps {
                 tail = (tail.0 + (head.0 - tail.0).signum(), tail.1 + 1);
-            } else if head.1 < tail.1 - 1 {
+            } else if head.1 < tail.1 - lag_steps {
                 tail = (tail.0 + (head.0 - tail.0).signum(), tail.1 - 1);
             } else {
                 // do not move
