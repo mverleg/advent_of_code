@@ -18,9 +18,8 @@ fn part_b(data: &str) -> usize {
 }
 
 fn run(data: &str, is_b: bool) -> usize {
-    let mut res = 0;
-    let mut head = (0, 0);
-    let mut tail = (0, 0);
+    let mut head = (0i32, 0i32);
+    let mut tail = (0i32, 0i32);
     let mut seen = HashSet::new();
     for line in data.lines() {
         let (dir, amt) = line.split_once(' ').expect("cannot parse line");
@@ -33,22 +32,14 @@ fn run(data: &str, is_b: bool) -> usize {
                 "D" => head.1 -= 1,
                 _ => panic!("unknown direction"),
             }
-            if head.0 > tail.0 + 1 && head.1 > tail.1 + 1 {
-                tail = (tail.0 + 1, tail.1 + 1);
-            } else if head.0 > tail.0 + 1 && head.1 < tail.1 - 1 {
-                tail = (tail.0 + 1, tail.1 - 1);
-            } else if head.0 < tail.0 - 1 && head.1 > tail.1 + 1 {
-                tail = (tail.0 - 1, tail.1 + 1);
-            } else if head.0 < tail.0 - 1 && head.1 < tail.1 - 1 {
-                tail = (tail.0 - 1, tail.1 - 1);
-            } else if head.0 > tail.0 + 1 {
-                tail = (tail.0 + 1, tail.1);
+            if head.0 > tail.0 + 1 {
+                tail = (tail.0 + 1, tail.1 + (head.1 - tail.1).signum());
             } else if head.0 < tail.0 - 1 {
-                tail = (tail.0 - 1, tail.1);
+                tail = (tail.0 - 1, tail.1 + (head.1 - tail.1).signum());
             } else if head.1 > tail.1 + 1 {
-                tail = (tail.0, tail.1 + 1);
+                tail = (tail.0 + (head.0 - tail.0).signum(), tail.1 + 1);
             } else if head.1 < tail.1 - 1 {
-                tail = (tail.0, tail.1 - 1);
+                tail = (tail.0 + (head.0 - tail.0).signum(), tail.1 - 1);
             } else {
                 // do not move
             }
@@ -57,5 +48,5 @@ fn run(data: &str, is_b: bool) -> usize {
         }
     }
     eprintln!("final head pos: {},{}  tail pos: {},{}", head.0, head.1, tail.0, tail.1);
-    res
+    seen.len()
 }
