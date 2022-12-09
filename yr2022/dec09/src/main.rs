@@ -33,9 +33,29 @@ fn run(data: &str, is_b: bool) -> usize {
                 "D" => head.1 -= 1,
                 _ => panic!("unknown direction"),
             }
+            if head.0 > tail.0 + 1 && head.1 > tail.1 + 1 {
+                tail = (tail.0 + 1, tail.1 + 1);
+            } else if head.0 > tail.0 + 1 && head.1 < tail.1 - 1 {
+                tail = (tail.0 + 1, tail.1 - 1);
+            } else if head.0 < tail.0 - 1 && head.1 > tail.1 + 1 {
+                tail = (tail.0 - 1, tail.1 + 1);
+            } else if head.0 < tail.0 - 1 && head.1 < tail.1 - 1 {
+                tail = (tail.0 - 1, tail.1 - 1);
+            } else if head.0 > tail.0 + 1 {
+                tail = (tail.0 + 1, tail.1);
+            } else if head.0 < tail.0 - 1 {
+                tail = (tail.0 - 1, tail.1);
+            } else if head.1 > tail.1 + 1 {
+                tail = (tail.0, tail.1 + 1);
+            } else if head.1 < tail.1 - 1 {
+                tail = (tail.0, tail.1 - 1);
+            } else {
+                // do not move
+            }
+            eprintln!("head pos: {},{}  tail pos: {},{} after {dir} {amt}", head.0, head.1, tail.0, tail.1);
             seen.insert(tail);
         }
     }
-    eprintln!("head final pos: {},{}", head.0, head.1);
+    eprintln!("final head pos: {},{}  tail pos: {},{}", head.0, head.1, tail.0, tail.1);
     res
 }
