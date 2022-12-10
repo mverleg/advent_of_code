@@ -5,21 +5,15 @@ use ::std::fs::read_to_string;
 fn main() {
     let data = read_to_string("data.txt").unwrap();
     println!("{}\n", part_a(&data));
-    //println!("{}", part_b(&data));
+    println!("{}", part_b(&data));
 }
 
 fn part_a(data: &str) -> i64 {
     let registers = fill_registers(data);
-    for (i, reg) in registers.into_iter().enumerate() {
-        if (i + 22) % 40 <= 2 {
-            eprintln!("{i} {reg}");
-        }
-    }
     let mut total: i64 = 0;
     let mut i = 19;
     while i < registers.len() {
         total += (i + 1) as i64 * registers[i];
-        //eprintln!(">> {i} {}: +{} = {}", registers[i], (i + 1) as i64 * registers[i], total);
         i += 40;
     }
     total
@@ -28,12 +22,11 @@ fn part_a(data: &str) -> i64 {
 fn part_b(data: &str) -> i64 {
     let registers = fill_registers(data);
     for (i, reg) in registers.into_iter().enumerate() {
-        eprintln!("{i} {reg}");
         let row_i = (i % 40) as i64;
         if row_i == 0 {
             println!();
         }
-        let is_pixel_on = row_i == reg;
+        let is_pixel_on = row_i >= reg - 1 && row_i <= reg + 1;
         if is_pixel_on {
             print!("#");
         } else {
