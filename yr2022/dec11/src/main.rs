@@ -7,6 +7,14 @@ fn main() {
     println!("A: {}", part_a(&data));
     println!("B: {}", part_b(&data));
 }
+#[derive(Debug)]
+struct Monkey {
+    items: Vec<usize>,
+    operation: String,
+    test_mod: usize,
+    monkey_if_true: usize,
+    monkey_if_false: usize,
+}
 
 fn part_a(data: &str) -> usize {
     run(data, false)
@@ -17,9 +25,48 @@ fn part_b(data: &str) -> usize {
 }
 
 fn run(data: &str, is_b: bool) -> usize {
-    let mut res = 0;
-    for line in data.lines() {
-        todo!()
+    let monkeys = parse(data);
+    dbg!(monkeys);
+    todo!()
+}
+
+fn parse(data: &str) -> Vec<Monkey> {
+    let mut monkeys = vec![];
+    let mut lines = data.lines();
+    loop {
+        match lines.next() {
+            Some(line) => assert_eq!(line, &format!("Monkey {}:", monkeys.len())),
+            None => return monkeys
+        }
+        let item_str = lines.next().expect("no items");
+        assert!(item_str.starts_with("  Starting items: "));
+        let items = item_str[18..].split(", ")
+            .map(|item| item.parse::<usize>().expect("item nan"))
+            .collect::<Vec<_>>();
+        let op = word_after("  Operation: new = ", lines.next());
+        let test_mod = word_after("  Test: divisible by ", lines.next())
+            .parse::<usize>().expect("test mod nan");
+        let monkey_if_true = word_after("    If true: throw to monkey ", lines.next())
+            .parse::<usize>().expect("test true nan");;
+        let monkey_if_false = word_after("    If false: throw to monkey ", lines.next())
+            .parse::<usize>().expect("test false nan");;
+        monkeys.push(Monkey {
+            items,
+            operation: op,
+            test_mod,
+            monkey_if_true,
+            monkey_if_false,
+        });
+        match lines.next() {
+            Some("") => {},
+            Some(line) => panic!("unexpected: {line}"),
+            None => return monkeys,
+        }
     }
-    res
+}
+
+fn word_after(prefix: &str, line: Option<&str>) -> String {
+    let str = line.unwrap_or_else(|| panic!("missing '{prefix}'"));
+    assert!(str.starts_with(prefix));
+    str[prefix.len()..].to_owned()
 }
