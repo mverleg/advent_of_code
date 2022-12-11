@@ -9,6 +9,8 @@ fn main() {
     let data = read_to_string("data.txt").unwrap();
     println!("A: {}", part_a(&data));
     println!("B: {}", part_b(&data));
+    // wrong B: 2499999999 was for test input (and wrong)
+    // wrong B: 32393520315 (too high)
 }
 #[derive(Debug)]
 struct Monkey {
@@ -20,20 +22,24 @@ struct Monkey {
 }
 
 fn part_a(data: &str) -> usize {
-    run(data, false)
+    run(data, false, 20)
 }
 
 fn part_b(data: &str) -> usize {
-    run(data, true)
+    run(data, true, 10_000)
 }
 
-fn run(data: &str, is_b: bool) -> usize {
+fn run(data: &str, is_b: bool, iter_count: usize) -> usize {
     let mut monkeys = parse(data);
     let mut items = monkeys.iter()
         .map(|monkey| monkey.init_items.clone())
         .collect::<Vec<_>>();
+    let mut total_mod = monkeys.iter()
+        .map(|monkey| monkey.test_mod)
+        .reduce(|a, b| a * b).expect("no total mod");
+    println!("total mod = {total_mod}");
     let mut inspection_counts = vec![0usize; monkeys.len()];
-    for round in 0 .. 20 {
+    for round in 0 .. iter_count {
         for (i, monkey) in monkeys.iter().enumerate() {
             let current_items = items[i].clone();
             items[i].clear();
@@ -42,7 +48,11 @@ fn run(data: &str, is_b: bool) -> usize {
                 let expr = monkey.operation.replace("old", &old_item.to_string());
                 let mut new_item: usize = eval_int(&expr)
                     .expect("could not evaluate").try_into().unwrap();
-                new_item /= 3;
+                if is_b {
+                    new_item %= total_mod;
+                } else {
+                    new_item /= 3;
+                }
                 let to = if new_item % monkey.test_mod == 0 {
                     monkey.monkey_if_true
                 } else {
@@ -51,14 +61,15 @@ fn run(data: &str, is_b: bool) -> usize {
                 items[to].push(new_item);
             }
         }
-        println!("\nround {round}");
-        for (i, items) in items.iter().enumerate() {
-            println!("Monkey {i} passed {} times: {}", inspection_counts[i], items.iter().join(", "))
+        if !is_b {
+            println!("\nround {round}");
+            for (i, items) in items.iter().enumerate() {
+                println!("Monkey {i} passed {} times: {}", inspection_counts[i], items.iter().join(", "))
+            }
         }
     }
     inspection_counts.sort();
     inspection_counts.reverse();
-    dbg!(&inspection_counts);
     inspection_counts[0] * inspection_counts[1]
 }
 
