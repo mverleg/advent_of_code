@@ -30,11 +30,11 @@ fn part_b(data: &str) -> usize {
 }
 
 fn run(data: &str, is_b: bool, iter_count: usize) -> usize {
-    let mut monkeys = parse(data);
+    let monkeys = parse(data);
     let mut items = monkeys.iter()
         .map(|monkey| monkey.init_items.clone())
         .collect::<Vec<_>>();
-    let mut total_mod = monkeys.iter()
+    let total_mod = monkeys.iter()
         .map(|monkey| monkey.test_mod)
         .reduce(|a, b| a * b).expect("no total mod");
     println!("total mod = {total_mod}");
@@ -70,6 +70,7 @@ fn run(data: &str, is_b: bool, iter_count: usize) -> usize {
     }
     inspection_counts.sort();
     inspection_counts.reverse();
+    println!("passes: {}", inspection_counts.iter().join(", "));
     inspection_counts[0] * inspection_counts[1]
 }
 
@@ -90,9 +91,9 @@ fn parse(data: &str) -> Vec<Monkey> {
         let test_mod = word_after("  Test: divisible by ", lines.next())
             .parse::<usize>().expect("test mod nan");
         let monkey_if_true = word_after("    If true: throw to monkey ", lines.next())
-            .parse::<usize>().expect("test true nan");;
+            .parse::<usize>().expect("test true nan");
         let monkey_if_false = word_after("    If false: throw to monkey ", lines.next())
-            .parse::<usize>().expect("test false nan");;
+            .parse::<usize>().expect("test false nan");
         monkeys.push(Monkey {
             init_items: items,
             operation: op,
