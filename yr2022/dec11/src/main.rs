@@ -1,4 +1,5 @@
 use ::std::fs::read_to_string;
+use itertools::Itertools;
 
 use ::evalexpr::eval_int;
 
@@ -32,22 +33,26 @@ fn run(data: &str, is_b: bool) -> usize {
         .map(|monkey| monkey.init_items.clone())
         .collect::<Vec<_>>();
     for round in 0 .. 20 {
-        let mut new_items = vec![vec![]; items.len()];
         for (i, monkey) in monkeys.iter().enumerate() {
-            for old_item in items[i].iter() {
+            let current_items = items[i].clone();
+            items[i].clear();
+            for old_item in current_items {
                 let expr = monkey.operation.replace("old", &old_item.to_string());
-                let new_item: usize = eval_int(&expr)
-                    .expect("could not evaluate").-try_into().unwrap()
-                    / 3;
+                let mut new_item: usize = eval_int(&expr)
+                    .expect("could not evaluate").try_into().unwrap();
+                new_item /= 3;
                 let to = if new_item % monkey.test_mod == 0 {
                     monkey.monkey_if_true
                 } else {
                     monkey.monkey_if_false
                 };
-                new_items[to].push(new_item);
+                items[to].push(new_item);
             }
         }
-        items = new_items;
+        println!("\nround {round}");
+        for (i, items) in items.iter().enumerate() {
+            println!("Monkey {i}: {}", items.iter().join(", "))
+        }
     }
     todo!()
 }
