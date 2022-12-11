@@ -32,10 +32,12 @@ fn run(data: &str, is_b: bool) -> usize {
     let mut items = monkeys.iter()
         .map(|monkey| monkey.init_items.clone())
         .collect::<Vec<_>>();
+    let mut inspection_counts = vec![0usize; monkeys.len()];
     for round in 0 .. 20 {
         for (i, monkey) in monkeys.iter().enumerate() {
             let current_items = items[i].clone();
             items[i].clear();
+            inspection_counts[i] += current_items.len();
             for old_item in current_items {
                 let expr = monkey.operation.replace("old", &old_item.to_string());
                 let mut new_item: usize = eval_int(&expr)
@@ -51,10 +53,13 @@ fn run(data: &str, is_b: bool) -> usize {
         }
         println!("\nround {round}");
         for (i, items) in items.iter().enumerate() {
-            println!("Monkey {i}: {}", items.iter().join(", "))
+            println!("Monkey {i} passed {} times: {}", inspection_counts[i], items.iter().join(", "))
         }
     }
-    todo!()
+    inspection_counts.sort();
+    inspection_counts.reverse();
+    dbg!(&inspection_counts);
+    inspection_counts[0] * inspection_counts[1]
 }
 
 fn parse(data: &str) -> Vec<Monkey> {
