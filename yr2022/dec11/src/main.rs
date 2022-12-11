@@ -1,5 +1,7 @@
 use ::std::fs::read_to_string;
 
+use ::evalexpr::eval_int;
+
 //
 
 fn main() {
@@ -9,7 +11,7 @@ fn main() {
 }
 #[derive(Debug)]
 struct Monkey {
-    items: Vec<usize>,
+    init_items: Vec<usize>,
     operation: String,
     test_mod: usize,
     monkey_if_true: usize,
@@ -25,8 +27,24 @@ fn part_b(data: &str) -> usize {
 }
 
 fn run(data: &str, is_b: bool) -> usize {
-    let monkeys = parse(data);
-    dbg!(monkeys);
+    let mut monkeys = parse(data);
+    let mut items = monkeys.iter()
+        .map(|monkey| monkey.init_items.clone())
+        .collect::<Vec<_>>();
+    let mut new_items = vec![vec![]; items.len()];
+    for (i, monkey) in monkeys.iter().enumerate() {
+        for old_item in items[i].iter() {
+            let expr = monkey.operation.replace("old", &old_item.to_string());
+            let new_item: usize = eval_int(&expr).expect("could not evaluate").try_into().unwrap();
+            let to = if new_item % monkey.test_mod == 0 {
+                monkey.monkey_if_true
+            } else {
+                monkey.monkey_if_false
+            };
+            new_items[to].push(new_item);
+        }
+    }
+    items = new_items;
     todo!()
 }
 
@@ -51,7 +69,7 @@ fn parse(data: &str) -> Vec<Monkey> {
         let monkey_if_false = word_after("    If false: throw to monkey ", lines.next())
             .parse::<usize>().expect("test false nan");;
         monkeys.push(Monkey {
-            items,
+            init_items: items,
             operation: op,
             test_mod,
             monkey_if_true,
