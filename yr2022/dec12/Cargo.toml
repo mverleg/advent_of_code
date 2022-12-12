@@ -1,5 +1,5 @@
 [package]
-name = "dec11"
+name = "dec12"
 version = "0.1.0"
 edition = "2021"
 
@@ -7,7 +7,6 @@ edition = "2021"
 lazy_static = "1.4.0"
 regex = "1.7.0"
 itertools = "0.10.5"
-evalexpr = "8.1.0"
 
 [profile.dev.package."*"]
 opt-level = 3
