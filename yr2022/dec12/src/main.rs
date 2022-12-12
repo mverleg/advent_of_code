@@ -33,9 +33,16 @@ fn part_b(data: &str) -> usize {
 fn run(data: &str, is_b: bool) -> usize {
     let (start, end, grid) = parse(data);
     let mut min_cost = vec![vec![usize::MAX; grid[0].len()]; grid.len()];
-    search(Step { pos: start, cost: 0, prev: None }, end, &grid, &mut min_cost);
-    dbg!(&grid);
-    todo!();
+    let mut path = search(Step { pos: start, cost: 0, prev: None }, end, &grid, &mut min_cost)
+        .expect("no path found");
+    let mut step_count = 0;
+    while let Some(step) = path.prev {
+        eprint!("{},{}; ", step.pos.x, step.pos.y);
+        path = (*step).clone();
+        step_count += 1;
+    }
+    eprintln!("");
+    step_count
 }
 
 fn search(cur: Step, end: Pos, grid: &[Vec<u8>], min_cost: &mut [Vec<usize>]) -> Option<Step> {
