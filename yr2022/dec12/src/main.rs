@@ -5,8 +5,7 @@ use ::std::rc::Rc;
 
 fn main() {
     let data = read_to_string("data.txt").unwrap();
-    //println!("A: {}", part_a(&data));
-    let answer_a = 937; // not actual nr of steps, hack
+    println!("A: {}", part_a(&data));
     println!("B: {}", part_b(&data));
 }
 
@@ -27,34 +26,32 @@ fn part_a(data: &str) -> usize {
     // intentionally invert start and end
     let (end, start, grid) = parse(data);
     let mut min_cost = vec![vec![usize::MAX; grid[0].len()]; grid.len()];
-    let mut path = search(Step { pos: start, cost: 0, prev: None }, end, &grid, &mut min_cost)
-        .expect("no path found");
-    let mut step_count = 0;
-    print!("cost={} ", path.cost);
-    while let Some(step) = path.prev {
-        print!("{},{}; ", step.pos.x, step.pos.y);
-        path = (*step).clone();
-        step_count += 1;
-    }
-    println!("");
-    step_count
+    search(Step { pos: end, cost: 0, prev: None }, &grid, &mut min_cost);
+    show_cost_grid(&min_cost);
+    // let mut step_count = 0;
+    // while let Some(step) = path.prev {
+    //     print!("{},{}; ", step.pos.x, step.pos.y);
+    //     path = (*step).clone();
+    //     step_count += 1;
+    // }
+    // println!("");
+    //step_count
+    todo!()
 }
 
 fn part_b(data: &str) -> usize {
     let (_, start, grid) = parse(data);
     let mut min_cost = vec![vec![usize::MAX; grid[0].len()]; grid.len()];
-    let fake_end = Pos { x: usize::MAX, y: usize::MAX };
-    let mut path = search(Step { pos: start, cost: 0, prev: None }, fake_end, &grid, &mut min_cost);
-    assert!(path.is_none());
+    let mut path = search(Step { pos: start, cost: 0, prev: None }, &grid, &mut min_cost);
     min_cost;
     todo!()
 }
 
-fn search(cur: Step, end: Pos, grid: &[Vec<u8>], min_cost: &mut [Vec<usize>]) -> Option<Step> {
+fn search(cur: Step, grid: &[Vec<u8>], min_cost: &mut [Vec<usize>]) {
     //eprintln!("{}, {}: c{} h{}", cur.pos.x, cur.pos.y, cur.cost, grid[cur.pos.x][cur.pos.y]);
-    if cur.pos == end {
-        return Some(cur);
-    }
+    // if cur.pos == end {
+    //     return;
+    // }
     let cur_pos = cur.pos;
     let mut q = cur.clone();
     while let Some(p) = q.prev {
@@ -64,24 +61,23 @@ fn search(cur: Step, end: Pos, grid: &[Vec<u8>], min_cost: &mut [Vec<usize>]) ->
     //eprintln!("!!! {},{}", cur_pos.x, cur_pos.y); //TODO @mark: TEMPORARY! REMOVE THIS!
     if cur.cost >= min_cost[cur_pos.x][cur_pos.y] {
         //eprintln!("{}, {}  EE", cur_pos.x, cur_pos.y);
-        return None;
+        return;
     }
     min_cost[cur_pos.x][cur_pos.y] = cur.cost;
     let next_cost = cur.cost + 1;
     let cur_ref = Rc::new(cur);
     let next_min_height = grid[cur_pos.x][cur_pos.y].saturating_sub(1);
-    let mut moves = vec![];
     if cur_pos.x < grid.len() - 1 && grid[cur_pos.x + 1][cur_pos.y] >= next_min_height {
         let next = Step { pos: Pos { x: cur_pos.x + 1, y: cur_pos.y }, cost: next_cost + 1, prev: Some(cur_ref.clone()) };
         //eprintln!("{}, {}  x+", cur_pos.x, cur_pos.y);
-        moves.push(search(next, end, grid, min_cost));
+        search(next, grid, min_cost);
         //} else {
         //if cur_pos.x < grid.len() - 1 { eprintln!("{}, {}  x+ NOT h={}", cur_pos.x, cur_pos.y, grid[cur_pos.x + 1][cur_pos.y]) };
     };
     if cur_pos.x > 0 && grid[cur_pos.x - 1][cur_pos.y] >= next_min_height {
         let next = Step { pos: Pos { x: cur_pos.x - 1, y: cur_pos.y }, cost: next_cost + 1, prev: Some(cur_ref.clone()) };
         //eprintln!("{}, {}  x-", cur_pos.x, cur_pos.y);
-        moves.push(search(next, end, grid, min_cost));
+        search(next, grid, min_cost);
         //} else {
         //if cur_pos.x > 0 { eprintln!("{}, {}  x- NOT h={}", cur_pos.x, cur_pos.y, grid[cur_pos.x - 1][cur_pos.y]) };
     };
@@ -89,18 +85,26 @@ fn search(cur: Step, end: Pos, grid: &[Vec<u8>], min_cost: &mut [Vec<usize>]) ->
         let next = Step { pos: Pos { x: cur_pos.x, y: cur_pos.y + 1 }, cost: next_cost + 1, prev: Some(cur_ref.clone()) };
         //eprintln!("{}<{}", cur_pos.y, grid[0].len() - 1);  //TODO @mark: TEMPORARY! REMOVE THIS!
         //eprintln!("{}, {}  y+", cur_pos.x, cur_pos.y);
-        moves.push(search(next, end, grid, min_cost));
+        search(next, grid, min_cost);
         //} else {
         //if cur_pos.y < grid[0].len() - 1 { eprintln!("{}, {}  y+ NOT h={}", cur_pos.x, cur_pos.y, grid[cur_pos.x][cur_pos.y + 1]) };
     };
     if cur_pos.y > 0 && grid[cur_pos.x][cur_pos.y - 1] >= next_min_height {
         let next = Step { pos: Pos { x: cur_pos.x, y: cur_pos.y - 1 }, cost: next_cost + 1, prev: Some(cur_ref) };
         //eprintln!("{}, {}  y-", cur_pos.x, cur_pos.y);
-        moves.push(search(next, end, grid, min_cost));
+        search(next, grid, min_cost);
         //} else {
         //if cur_pos.y > 0 { eprintln!("{}, {}  y- NOT h={}", cur_pos.x, cur_pos.y, grid[cur_pos.x][cur_pos.y - 1]) };
     };
-    moves.into_iter().flatten().min_by_key(|step| step.cost)
+}
+
+fn show_cost_grid(costs: &[Vec<usize>]) {
+    for row in costs {
+        for cell in row {
+            print!("{cell: >3} ")
+        }
+        println!("");
+    }
 }
 
 fn parse(data: &str) -> (Pos, Pos, Vec<Vec<u8>>) {
