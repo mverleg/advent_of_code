@@ -33,50 +33,55 @@ fn part_b(data: &str) -> usize {
 fn run(data: &str, is_b: bool) -> usize {
     let (start, end, grid) = parse(data);
     let mut min_cost = vec![vec![usize::MAX; grid.len()]; grid[0].len()];
-    astar(Step { pos: start, cost: 0, prev: None }, end, &grid, &mut min_cost);
+    search(Step { pos: start, cost: 0, prev: None }, end, &grid, &mut min_cost);
     dbg!(&grid);
     todo!();
 }
 
-fn astar(cur: Step, end: Pos, grid: &[Vec<u8>], min_cost: &mut [Vec<usize>]) -> Step {
+fn search(cur: Step, end: Pos, grid: &[Vec<u8>], min_cost: &mut [Vec<usize>]) -> Option<Step> {
     eprintln!("{}, {}: c{} h{}", cur.pos.x, cur.pos.y, cur.cost, grid[cur.pos.x][cur.pos.y]);
     if cur.pos == end {
-        return cur
+        return Some(cur)
     }
     let cur_pos = cur.pos;
+    if cur.cost > min_cost[cur_pos.x][cur_pos.y] {
+        eprintln!("{}, {}  EE", cur_pos.x, cur_pos.y);
+        return None
+    }
+    min_cost[cur_pos.x][cur_pos.y] = cur.cost;
     let next_cost = cur.cost + 1;
     let cur_ref = Rc::new(cur);
     let next_max_height = grid[cur_pos.x][cur_pos.y] + 1;
     let mut moves = vec![];
     if cur_pos.x < grid.len() - 1 && grid[cur_pos.x + 1][cur_pos.y] <= next_max_height {
         let next = Step { pos: Pos { x: cur_pos.x + 1, y: cur_pos.y }, cost: next_cost + 1, prev: Some(cur_ref.clone()), };
-        moves.push(astar(next, end, grid, min_cost));
-        eprintln!("  x+");
+        moves.push(search(next, end, grid, min_cost));
+        eprintln!("{}, {}  x+", cur_pos.x, cur_pos.y);
     } else {
-        if cur_pos.x < grid.len() - 1 { eprintln!("  x+ NOT h={}", grid[cur_pos.x + 1][cur_pos.y]) };
+        if cur_pos.x < grid.len() - 1 { eprintln!("{}, {}  x+ NOT h={}", cur_pos.x, cur_pos.y, grid[cur_pos.x + 1][cur_pos.y]) };
     };
     if cur_pos.x > 0 && grid[cur_pos.x - 1][cur_pos.y] <= next_max_height {
         let next = Step { pos: Pos { x: cur_pos.x - 1, y: cur_pos.y }, cost: next_cost + 1, prev: Some(cur_ref.clone()), };
-        moves.push(astar(next, end, grid, min_cost));
-        eprintln!("  x-");
+        moves.push(search(next, end, grid, min_cost));
+        eprintln!("{}, {}  x-", cur_pos.x, cur_pos.y);
     } else {
-        if cur_pos.x > 0 { eprintln!("  x- NOT h={}", grid[cur_pos.x - 1][cur_pos.y]) };
+        if cur_pos.x > 0 { eprintln!("{}, {}  x- NOT h={}", cur_pos.x, cur_pos.y, grid[cur_pos.x - 1][cur_pos.y]) };
     };
     if cur_pos.y < grid[0].len() - 1 && grid[cur_pos.x][cur_pos.y + 1] <= next_max_height {
         let next = Step { pos: Pos { x: cur_pos.x, y: cur_pos.y + 1 }, cost: next_cost + 1, prev: Some(cur_ref.clone()), };
-        moves.push(astar(next, end, grid, min_cost));
-        eprintln!("  y+");
+        moves.push(search(next, end, grid, min_cost));
+        eprintln!("{}, {}  y+", cur_pos.x, cur_pos.y);
     } else {
-        if cur_pos.y < grid[0].len() - 1 { eprintln!("  y+ NOT h={}", grid[cur_pos.x][cur_pos.y + 1]) };
+        if cur_pos.y < grid[0].len() - 1 { eprintln!("{}, {}  y+ NOT h={}", cur_pos.x, cur_pos.y, grid[cur_pos.x][cur_pos.y + 1]) };
     };
     if cur_pos.y > 0 && grid[cur_pos.x][cur_pos.y - 1] <= next_max_height {
         let next = Step { pos: Pos { x: cur_pos.x, y: cur_pos.y - 1 }, cost: next_cost + 1, prev: Some(cur_ref), };
-        moves.push(astar(next, end, grid, min_cost));
-        eprintln!("  y-");
+        moves.push(search(next, end, grid, min_cost));
+        eprintln!("{}, {}  y-", cur_pos.x, cur_pos.y);
     } else {
-        if cur_pos.y > 0 { eprintln!("  y- NOT h={}", grid[cur_pos.x][cur_pos.y - 1]) };
+        if cur_pos.y > 0 { eprintln!("{}, {}  y- NOT h={}", cur_pos.x, cur_pos.y, grid[cur_pos.x][cur_pos.y - 1]) };
     };
-    moves.into_iter().min_by_key(|step| step.cost).expect("did not find exit")
+    moves.into_iter().flatten().min_by_key(|step| step.cost)
 }
 
 fn parse(data: &str) -> (Pos, Pos, Vec<Vec<u8>>) {
