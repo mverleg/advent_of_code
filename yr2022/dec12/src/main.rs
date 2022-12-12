@@ -46,19 +46,19 @@ fn run(data: &str, is_b: bool) -> usize {
 }
 
 fn search(cur: Step, end: Pos, grid: &[Vec<u8>], min_cost: &mut [Vec<usize>]) -> Option<Step> {
-    eprintln!("{}, {}: c{} h{}", cur.pos.x, cur.pos.y, cur.cost, grid[cur.pos.x][cur.pos.y]);
+    //eprintln!("{}, {}: c{} h{}", cur.pos.x, cur.pos.y, cur.cost, grid[cur.pos.x][cur.pos.y]);
     if cur.pos == end {
         return Some(cur)
     }
     let cur_pos = cur.pos;
     let mut q = cur.clone();
     while let Some(p) = q.prev {
-        eprint!("{},{}; ", p.pos.x, p.pos.y);
+        //eprint!("{},{}; ", p.pos.x, p.pos.y);
         q = (*p).clone();
     }
-    eprintln!("!!! {},{}", cur_pos.x, cur_pos.y); //TODO @mark: TEMPORARY! REMOVE THIS!
-    if cur.cost > min_cost[cur_pos.x][cur_pos.y] {
-        eprintln!("{}, {}  EE", cur_pos.x, cur_pos.y);
+    //eprintln!("!!! {},{}", cur_pos.x, cur_pos.y); //TODO @mark: TEMPORARY! REMOVE THIS!
+    if cur.cost >= min_cost[cur_pos.x][cur_pos.y] {
+        //eprintln!("{}, {}  EE", cur_pos.x, cur_pos.y);
         return None
     }
     min_cost[cur_pos.x][cur_pos.y] = cur.cost;
@@ -68,32 +68,32 @@ fn search(cur: Step, end: Pos, grid: &[Vec<u8>], min_cost: &mut [Vec<usize>]) ->
     let mut moves = vec![];
     if cur_pos.x < grid.len() - 1 && grid[cur_pos.x + 1][cur_pos.y] <= next_max_height {
         let next = Step { pos: Pos { x: cur_pos.x + 1, y: cur_pos.y }, cost: next_cost + 1, prev: Some(cur_ref.clone()), };
-        eprintln!("{}, {}  x+", cur_pos.x, cur_pos.y);
+        //eprintln!("{}, {}  x+", cur_pos.x, cur_pos.y);
         moves.push(search(next, end, grid, min_cost));
-    } else {
-        if cur_pos.x < grid.len() - 1 { eprintln!("{}, {}  x+ NOT h={}", cur_pos.x, cur_pos.y, grid[cur_pos.x + 1][cur_pos.y]) };
+    //} else {
+        //if cur_pos.x < grid.len() - 1 { eprintln!("{}, {}  x+ NOT h={}", cur_pos.x, cur_pos.y, grid[cur_pos.x + 1][cur_pos.y]) };
     };
     if cur_pos.x > 0 && grid[cur_pos.x - 1][cur_pos.y] <= next_max_height {
         let next = Step { pos: Pos { x: cur_pos.x - 1, y: cur_pos.y }, cost: next_cost + 1, prev: Some(cur_ref.clone()), };
-        eprintln!("{}, {}  x-", cur_pos.x, cur_pos.y);
+        //eprintln!("{}, {}  x-", cur_pos.x, cur_pos.y);
         moves.push(search(next, end, grid, min_cost));
-    } else {
-        if cur_pos.x > 0 { eprintln!("{}, {}  x- NOT h={}", cur_pos.x, cur_pos.y, grid[cur_pos.x - 1][cur_pos.y]) };
+    //} else {
+        //if cur_pos.x > 0 { eprintln!("{}, {}  x- NOT h={}", cur_pos.x, cur_pos.y, grid[cur_pos.x - 1][cur_pos.y]) };
     };
     if cur_pos.y < grid[0].len() - 1 && grid[cur_pos.x][cur_pos.y + 1] <= next_max_height {
         let next = Step { pos: Pos { x: cur_pos.x, y: cur_pos.y + 1 }, cost: next_cost + 1, prev: Some(cur_ref.clone()), };
-        eprintln!("{}<{}", cur_pos.y, grid[0].len() - 1);  //TODO @mark: TEMPORARY! REMOVE THIS!
-        eprintln!("{}, {}  y+", cur_pos.x, cur_pos.y);
+        //eprintln!("{}<{}", cur_pos.y, grid[0].len() - 1);  //TODO @mark: TEMPORARY! REMOVE THIS!
+        //eprintln!("{}, {}  y+", cur_pos.x, cur_pos.y);
         moves.push(search(next, end, grid, min_cost));
-    } else {
-        if cur_pos.y < grid[0].len() - 1 { eprintln!("{}, {}  y+ NOT h={}", cur_pos.x, cur_pos.y, grid[cur_pos.x][cur_pos.y + 1]) };
+    //} else {
+        //if cur_pos.y < grid[0].len() - 1 { eprintln!("{}, {}  y+ NOT h={}", cur_pos.x, cur_pos.y, grid[cur_pos.x][cur_pos.y + 1]) };
     };
     if cur_pos.y > 0 && grid[cur_pos.x][cur_pos.y - 1] <= next_max_height {
         let next = Step { pos: Pos { x: cur_pos.x, y: cur_pos.y - 1 }, cost: next_cost + 1, prev: Some(cur_ref), };
-        eprintln!("{}, {}  y-", cur_pos.x, cur_pos.y);
+        //eprintln!("{}, {}  y-", cur_pos.x, cur_pos.y);
         moves.push(search(next, end, grid, min_cost));
-    } else {
-        if cur_pos.y > 0 { eprintln!("{}, {}  y- NOT h={}", cur_pos.x, cur_pos.y, grid[cur_pos.x][cur_pos.y - 1]) };
+    //} else {
+        //if cur_pos.y > 0 { eprintln!("{}, {}  y- NOT h={}", cur_pos.x, cur_pos.y, grid[cur_pos.x][cur_pos.y - 1]) };
     };
     moves.into_iter().flatten().min_by_key(|step| step.cost)
 }
