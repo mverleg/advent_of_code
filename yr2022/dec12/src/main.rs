@@ -5,8 +5,10 @@ use ::std::rc::Rc;
 
 fn main() {
     let data = read_to_string("data.txt").unwrap();
-    println!("A: {}", part_a(&data));
-    println!("B: {}", part_b(&data));
+    let (start, _end, grid, min_costs) = solve_costs(&data);
+    show_cost_grid(&min_costs);
+    println!("A: {}", part_a(&min_costs, start));
+    println!("B: {}", part_b(&min_costs, &grid));
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -22,27 +24,29 @@ struct Step {
     prev: Option<Rc<Step>>,
 }
 
-fn part_a(data: &str) -> usize {
-    let (_start, end, grid) = parse(data);
-    let mut min_cost = vec![vec![usize::MAX; grid[0].len()]; grid.len()];
-    search(Step { pos: end, cost: 0, prev: None }, &grid, &mut min_cost);
-    show_cost_grid(&min_cost);
-    // let mut step_count = 0;
-    // while let Some(step) = path.prev {
-    //     print!("{},{}; ", step.pos.x, step.pos.y);
-    //     path = (*step).clone();
-    //     step_count += 1;
-    // }
-    // println!("");
-    //step_count
-    todo!()
+fn part_a(costs: &[Vec<usize>], start: Pos) -> usize {
+    costs[start.x][start.y]
 }
 
-fn part_b(data: &str) -> usize {
-    let (_, start, grid) = parse(data);
-    let mut min_cost = vec![vec![usize::MAX; grid[0].len()]; grid.len()];
-    search(Step { pos: start, cost: 0, prev: None }, &grid, &mut min_cost);
-    todo!()
+fn part_b(costs: &[Vec<usize>], grid: &[Vec<u8>]) -> usize {
+    let mut lowest_cost = usize::MAX;
+    for x in 0..grid.len() {
+        for y in 0..grid[0].len() {
+            if grid[x][y] == 0 {
+                if costs[x][y] < lowest_cost {
+                    lowest_cost = costs[x][y];
+                }
+            }
+        }
+    }
+    lowest_cost
+}
+
+fn solve_costs(data: &str) -> (Pos, Pos, Vec<Vec<u8>>, Vec<Vec<usize>>) {
+    let (start, end, grid) = parse(data);
+    let mut min_costs = vec![vec![usize::MAX; grid[0].len()]; grid.len()];
+    search(Step { pos: end, cost: 0, prev: None }, &grid, &mut min_costs);
+    (start, end, grid, min_costs)
 }
 
 fn search(cur: Step, grid: &[Vec<u8>], min_cost: &mut [Vec<usize>]) {
