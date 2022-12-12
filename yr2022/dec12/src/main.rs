@@ -17,21 +17,31 @@ fn part_b(data: &str) -> usize {
 }
 
 fn run(data: &str, is_b: bool) -> usize {
-    let mut res = 0;
-    for line in data.lines() {
-        todo!()
-    }
-    res
+    let (start, end, grid) = parse(data);
+    dbg!(&grid);
+    todo!();
 }
 
-fn parse(data: &str) -> Vec<Vec<u8>> {
+fn parse(data: &str) -> ((usize, usize), (usize, usize), Vec<Vec<u8>>) {
+    let mut start = (0, 0);
+    let mut end = (0, 0);
     let mut grid = vec![];
-    for line in data.lines() {
+    for (i, line) in data.lines().enumerate() {
         let mut row = vec![];
-        for chr in line.chars() {
-            row.push(chr.to_digit(36) - 10);
+        for (j, chr) in line.chars().enumerate() {
+            let val = if chr == 'S' {
+                start = (i, j);
+                0
+            } else if chr == 'E' {
+                end = (i, j);
+                25
+            } else {
+                chr.to_digit(36).expect("not a b36 digit") - 10
+            };
+            assert!(val >=0 && val < 26);
+            row.push(val as u8);
         }
         grid.push(row);
     }
-    grid
+    (start, end, grid)
 }
