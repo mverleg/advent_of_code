@@ -23,3 +23,15 @@ fn run(data: &str, is_b: bool) -> usize {
     }
     res
 }
+
+fn parse(data: &str) -> Vec<Vec<u8>> {
+    let mut grid = vec![];
+    for line in data.lines() {
+        let mut row = vec![];
+        for chr in line.chars() {
+            row.push(chr.to_digit(36) - 10);
+        }
+        grid.push(row);
+    }
+    grid
+}
