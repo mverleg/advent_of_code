@@ -3,8 +3,6 @@ use ::std::fmt;
 use ::std::fmt::Formatter;
 use ::std::fs::read_to_string;
 
-use ::itertools::max;
-
 //
 
 fn main() {
@@ -20,7 +18,7 @@ fn part_a(data: &[(Entry, Entry)]) -> usize {
     let mut index_sum = 0;
     for (i, (entry1, entry2)) in data.iter().enumerate() {
         if determine_ordering(entry1.as_list(), entry2.as_list()) == Ordering::Less {
-            println!("i={}", i+1);
+            //println!("i={}", i+1);
             index_sum += i + 1
         }
     }
@@ -28,6 +26,14 @@ fn part_a(data: &[(Entry, Entry)]) -> usize {
 }
 
 fn part_b(data: &[(Entry, Entry)]) -> usize {
+    use Entry::*;
+    let mut flat = vec![List(vec![List(vec![Int(2)])]), List(vec![List(vec![Int(6)])])];
+    for (entry1, entry2) in data {
+        flat.push(entry1.clone());
+        flat.push(entry2.clone());
+    }
+    flat.sort_by(determine_ordering);
+    dbg!(&flat);
     todo!()
 }
 
