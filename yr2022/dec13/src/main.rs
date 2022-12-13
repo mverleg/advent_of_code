@@ -53,10 +53,19 @@ impl fmt::Display for Entry {
 
 fn parse(data: &str) -> Vec<(Entry, Entry)> {
     let mut lines = data.lines();
-    vec![(
-        parse_entry(&to_chrs(lines.next())).1,
-        parse_entry(&to_chrs(lines.next())).1,
-    )]
+    let mut pairs = vec![];
+    loop {
+        pairs.push((
+            parse_entry(&to_chrs(lines.next())).1,
+            parse_entry(&to_chrs(lines.next())).1,
+        ));
+        match lines.next() {
+            Some("") => {},
+            Some(txt) => unimplemented!("expected empty line, got {}", txt),
+            None => break,
+        }
+    }
+    pairs
 }
 
 fn to_chrs(line: Option<&str>) -> Vec<char> {
@@ -73,26 +82,24 @@ fn parse_entry(line: &[char]) -> (usize, Entry) {
     let mut cur_nr = String::new();
     while i < line.len() {
         if line[i].is_digit(10) {
-            println!("i={i} nr");
             while line[i].is_digit(10) {
                 cur_nr.push(line[i]);
                 i += 1;
             }
-            if line[i] == ']' {
-                break
-            }
-            assert!(line[i] == ',');
-            i += 1;
             list.push(Entry::Int(cur_nr.parse::<usize>().unwrap()));
             cur_nr.clear();
         } else if line[i] == '[' {
-            println!("i={i} list");
-            let (new_i, sub_list) = parse_entry(&line[i..]);
-            i = new_i;
+            let (char_read_count, sub_list) = parse_entry(&line[i..]);
+            i += char_read_count;
             list.push(sub_list);
         } else {
-            unimplemented!("{}", line[i])
+            unimplemented!("{} as {}", line[i], i)
         }
+        if line[i] == ']' {
+            break
+        }
+        assert!(line[i] == ',');
+        i += 1;
     }
-    (i, Entry::List(list))
+    (i + 1, Entry::List(list))
 }
