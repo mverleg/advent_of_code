@@ -1,8 +1,9 @@
+use ::std::cmp::Ordering;
 use ::std::fmt;
 use ::std::fmt::Formatter;
 use ::std::fs::read_to_string;
 
-use ::itertools::Itertools;
+use ::itertools::max;
 
 //
 
@@ -16,7 +17,14 @@ fn main() {
 }
 
 fn part_a(data: &[(Entry, Entry)]) -> usize {
-    todo!()
+    let mut index_sum = 0;
+    for (i, (entry1, entry2)) in data.iter().enumerate() {
+        if determine_ordering(entry1.as_list(), entry2.as_list()) == Ordering::Less {
+            println!("i={i}");
+            index_sum += i + 1
+        }
+    }
+    index_sum
 }
 
 fn part_b(data: &[(Entry, Entry)]) -> usize {
@@ -27,6 +35,15 @@ fn part_b(data: &[(Entry, Entry)]) -> usize {
 enum Entry {
     List(Vec<Entry>),
     Int(usize),
+}
+
+impl Entry {
+    fn as_list(&self) -> &[Entry] {
+        match self {
+            Entry::List(li) => li,
+            Entry::Int(_) => panic!("cannot call as_list on nr"),
+        }
+    }
 }
 
 impl fmt::Display for Entry {
@@ -101,4 +118,29 @@ fn parse_entry(line: &[char]) -> (usize, Entry) {
         i += 1;
     }
     (i + 1, Entry::List(list))
+}
+
+fn determine_ordering(entry1: &[Entry], entry2: &[Entry]) -> Ordering {
+    use Entry::*;
+    let mut i = 0;
+    loop {
+        println!("compare {} and {}",
+                 entry1.get(i).map(|s| s.to_string()).unwrap_or_else(|| "empty".to_string()),
+                 entry2.get(i).map(|s| s.to_string()).unwrap_or_else(|| "empty".to_string()));
+        let cmp = match (entry1.get(i), entry2.get(i)) {
+            (Some(List(li1)), Some(List(li2))) => determine_ordering(li1, li2),
+            (Some(List(li1)), Some(Int(nr2))) => determine_ordering(li1, &[Int(*nr2)]),
+            (Some(Int(nr1)), Some(List(li2))) => determine_ordering(&[Int(*nr1)], li2),
+            (Some(Int(nr1)), Some(Int(nr2))) => nr1.cmp(nr2),
+            (Some(_), None) => return Ordering::Less,
+            (None, Some(_)) => return Ordering::Greater,
+            (None, None) => panic!(),
+        };
+        if cmp != Ordering::Equal {
+            println!("  neq: {:?}", cmp);
+            return cmp
+        }
+        i += 1;
+    }
+    unimplemented!()
 }
