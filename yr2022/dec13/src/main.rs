@@ -1,11 +1,16 @@
+use ::std::fmt;
+use ::std::fmt::Formatter;
 use ::std::fs::read_to_string;
-use std::fmt;
-use std::fmt::Formatter;
+
+use ::itertools::Itertools;
 
 //
 
 fn main() {
     let data = parse(&read_to_string("data.txt").unwrap());
+    for (entry1, entry2) in &data {
+        println!("{}\n{}\n\n", entry1, entry2);
+    }
     println!("A: {}", part_a(&data));
     println!("B: {}", part_b(&data));
 }
@@ -48,10 +53,10 @@ impl fmt::Display for Entry {
 
 fn parse(data: &str) -> Vec<(Entry, Entry)> {
     let mut lines = data.lines();
-    vec![
+    vec![(
         parse_entry(&to_chrs(lines.next())).1,
         parse_entry(&to_chrs(lines.next())).1,
-    ]
+    )]
 }
 
 fn to_chrs(line: Option<&str>) -> Vec<char> {
@@ -62,11 +67,13 @@ fn to_chrs(line: Option<&str>) -> Vec<char> {
 
 fn parse_entry(line: &[char]) -> (usize, Entry) {
     assert!(line[0] == '[');
+    println!("parse_entry={}", line.iter().join(""));
     let mut i = 1;
     let mut list = vec![];
     let mut cur_nr = String::new();
     while i < line.len() {
         if line[i].is_digit(10) {
+            println!("i={i} nr");
             while line[i].is_digit(10) {
                 cur_nr.push(line[i]);
                 i += 1;
@@ -75,12 +82,16 @@ fn parse_entry(line: &[char]) -> (usize, Entry) {
                 break
             }
             assert!(line[i] == ',');
+            i += 1;
             list.push(Entry::Int(cur_nr.parse::<usize>().unwrap()));
             cur_nr.clear();
         } else if line[i] == '[' {
+            println!("i={i} list");
             let (new_i, sub_list) = parse_entry(&line[i..]);
             i = new_i;
             list.push(sub_list);
+        } else {
+            unimplemented!("{}", line[i])
         }
     }
     (i, Entry::List(list))
