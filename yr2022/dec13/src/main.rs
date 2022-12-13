@@ -3,7 +3,7 @@ use ::std::fmt;
 use ::std::fmt::Formatter;
 use ::std::fs::read_to_string;
 
-//
+// 1:05
 
 fn main() {
     let data = parse(&read_to_string("data.txt").unwrap());
@@ -27,17 +27,30 @@ fn part_a(data: &[(Entry, Entry)]) -> usize {
 
 fn part_b(data: &[(Entry, Entry)]) -> usize {
     use Entry::*;
-    let mut flat = vec![List(vec![List(vec![Int(2)])]), List(vec![List(vec![Int(6)])])];
+    let mut flat = vec![vec![List(vec![Int(2)])], vec![List(vec![Int(6)])]];
     for (entry1, entry2) in data {
-        flat.push(entry1.clone());
-        flat.push(entry2.clone());
+        flat.push(entry1.as_list().to_vec());
+        flat.push(entry2.as_list().to_vec());
     }
-    flat.sort_by(determine_ordering);
-    dbg!(&flat);
-    todo!()
+    flat.sort_by(|a, b| determine_ordering(a, b));
+    let mut marker1 = usize::MAX;
+    let mut marker2 = usize::MAX;
+    for (i, entry) in flat.iter().enumerate() {
+        if entry.as_slice() == [List(vec![Int(2)])].as_slice() {
+            assert!(marker1 == usize::MAX);
+            marker1 = i + 1;
+        }
+        if entry.as_slice() == [List(vec![Int(6)])].as_slice() {
+            assert!(marker2 == usize::MAX);
+            marker2 = i + 1;
+        }
+    }
+    assert!(marker1 < usize::MAX);
+    assert!(marker2 < usize::MAX);
+    marker1 * marker2
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 enum Entry {
     List(Vec<Entry>),
     Int(usize),
