@@ -20,7 +20,7 @@ fn part_a(data: &[(Entry, Entry)]) -> usize {
     let mut index_sum = 0;
     for (i, (entry1, entry2)) in data.iter().enumerate() {
         if determine_ordering(entry1.as_list(), entry2.as_list()) == Ordering::Less {
-            println!("i={i}");
+            println!("i={}", i+1);
             index_sum += i + 1
         }
     }
@@ -122,25 +122,25 @@ fn parse_entry(line: &[char]) -> (usize, Entry) {
 
 fn determine_ordering(entry1: &[Entry], entry2: &[Entry]) -> Ordering {
     use Entry::*;
-    let mut i = 0;
+    let mut j = 0;
     loop {
-        println!("compare {} and {}",
-                 entry1.get(i).map(|s| s.to_string()).unwrap_or_else(|| "empty".to_string()),
-                 entry2.get(i).map(|s| s.to_string()).unwrap_or_else(|| "empty".to_string()));
-        let cmp = match (entry1.get(i), entry2.get(i)) {
+        //println!("j={j} compare {} and {}",
+        //        entry1.get(j).map(|s| s.to_string()).unwrap_or_else(|| "empty".to_string()),
+        //        entry2.get(j).map(|s| s.to_string()).unwrap_or_else(|| "empty".to_string()));
+        let cmp = match (entry1.get(j), entry2.get(j)) {
             (Some(List(li1)), Some(List(li2))) => determine_ordering(li1, li2),
             (Some(List(li1)), Some(Int(nr2))) => determine_ordering(li1, &[Int(*nr2)]),
             (Some(Int(nr1)), Some(List(li2))) => determine_ordering(&[Int(*nr1)], li2),
             (Some(Int(nr1)), Some(Int(nr2))) => nr1.cmp(nr2),
-            (Some(_), None) => return Ordering::Less,
-            (None, Some(_)) => return Ordering::Greater,
-            (None, None) => panic!(),
+            (Some(_), None) => return Ordering::Greater,
+            (None, Some(_)) => return Ordering::Less,
+            (None, None) => return Ordering::Equal,
         };
         if cmp != Ordering::Equal {
-            println!("  neq: {:?}", cmp);
+            //println!("  neq: {:?}", cmp);
             return cmp
         }
-        i += 1;
+        j += 1;
     }
     unimplemented!()
 }
