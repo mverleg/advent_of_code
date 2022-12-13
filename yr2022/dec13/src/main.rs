@@ -9,7 +9,7 @@ use ::itertools::Itertools;
 fn main() {
     let data = parse(&read_to_string("data.txt").unwrap());
     for (entry1, entry2) in &data {
-        println!("{}\n{}\n\n", entry1, entry2);
+        println!("{}\n{}\n", entry1, entry2);
     }
     println!("A: {}", part_a(&data));
     println!("B: {}", part_b(&data));
@@ -76,7 +76,6 @@ fn to_chrs(line: Option<&str>) -> Vec<char> {
 
 fn parse_entry(line: &[char]) -> (usize, Entry) {
     assert!(line[0] == '[');
-    println!("parse_entry={}", line.iter().join(""));
     let mut i = 1;
     let mut list = vec![];
     let mut cur_nr = String::new();
@@ -92,8 +91,8 @@ fn parse_entry(line: &[char]) -> (usize, Entry) {
             let (char_read_count, sub_list) = parse_entry(&line[i..]);
             i += char_read_count;
             list.push(sub_list);
-        } else {
-            unimplemented!("{} as {}", line[i], i)
+        } else if line[i] != ']' {
+            unimplemented!("'{}' as {}", line[i], i)
         }
         if line[i] == ']' {
             break
