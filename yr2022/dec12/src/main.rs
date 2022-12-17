@@ -70,21 +70,24 @@ fn search_breadth_first(start: Pos, grid: &[Vec<u8>], min_cost: &mut [Vec<usize>
     queue.push_back((start, 0));
     while let Some((cur, prev_cost)) = queue.pop_front() {
         if prev_cost >= min_cost[cur.x][cur.y] {
-            continue;
+            continue
+        }
+        let next_min_height = grid[cur.x][cur.y].saturating_sub(1);
+        if grid[cur.x][cur.y] < next_min_height {
+            continue
         }
         min_cost[cur.x][cur.y] = prev_cost;
         let next_cost = prev_cost + 1;
-        let next_min_height = grid[cur.x][cur.y].saturating_sub(1);
-        if cur.x < grid.len() - 1 && grid[cur.x + 1][cur.y] >= next_min_height {
+        if cur.x < grid.len() - 1 {
             queue.push_back((Pos { x: cur.x + 1, y: cur.y }, next_cost));
         };
-        if cur.x > 0 && grid[cur.x - 1][cur.y] >= next_min_height {
+        if cur.x > 0 {
             queue.push_back((Pos { x: cur.x - 1, y: cur.y }, next_cost));
         };
-        if cur.y < grid[0].len() - 1 && grid[cur.x][cur.y + 1] >= next_min_height {
+        if cur.y < grid[0].len() - 1 {
             queue.push_back((Pos { x: cur.x, y: cur.y + 1 }, next_cost));
         };
-        if cur.y > 0 && grid[cur.x][cur.y - 1] >= next_min_height {
+        if cur.y > 0 {
             queue.push_back((Pos { x: cur.x, y: cur.y - 1 }, next_cost));
         };
     }
