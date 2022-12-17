@@ -67,44 +67,30 @@ fn solve_costs(data: &str, is_depth_first: bool) -> (Pos, Pos, Vec<Vec<u8>>, Vec
 
 fn search_breadth_first(start: Pos, grid: &[Vec<u8>], min_cost: &mut [Vec<usize>]) {
     let mut queue = VecDeque::with_capacity(grid.len());
-    queue.push_back(start);
-    while let Some(cur) = queue.pop_front() {
-        // if grid[cur.x][cur.y] < max_height {
-        //     continue
-        // }
-        // if cur_cost >= min_cost[cur.x][cur.y] {
-        //     continue
-        // }
+    queue.push_back((start, 0, grid[start.x][start.y].saturating_sub(1)));
+    while let Some((cur, cur_cost, max_height)) = queue.pop_front() {
+        if grid[cur.x][cur.y] < max_height {
+            continue
+        }
+        if cur_cost >= min_cost[cur.x][cur.y] {
+            continue
+        }
+        min_cost[cur.x][cur.y] = cur_cost;
         let next_min_height = grid[cur.x][cur.y].saturating_sub(1);
         let next_cost = cur_cost + 1;
         if cur.x < grid.len() - 1 {
-            can_visit(Pos { x: cur.x + 1, y: cur.y }, next_min_height, next_cost, grid, min_cost)
-                .map(|pos| queue.push_back(pos));
+            queue.push_back((Pos { x: cur.x + 1, y: cur.y }, next_cost, next_min_height));
         };
         if cur.x > 0 {
-            can_visit(Pos { x: cur.x - 1, y: cur.y }, next_min_height, next_cost, grid, min_cost)
-                .map(|pos| queue.push_back(pos));
+            queue.push_back((Pos { x: cur.x - 1, y: cur.y }, next_cost, next_min_height));
         };
         if cur.y < grid[0].len() - 1 {
-            can_visit(Pos { x: cur.x, y: cur.y + 1 }, next_min_height, next_cost, grid, min_cost)
-                .map(|pos| queue.push_back(pos));
+            queue.push_back((Pos { x: cur.x, y: cur.y + 1 }, next_cost, next_min_height));
         };
         if cur.y > 0 {
-            can_visit(Pos { x: cur.x, y: cur.y - 1 }, next_min_height, next_cost, grid, min_cost)
-                .map(|pos| queue.push_back(pos));
+            queue.push_back((Pos { x: cur.x, y: cur.y - 1 }, next_cost, next_min_height));
         };
     }
-}
-
-fn can_visit(next_pos: Pos, next_min_height: u8, cur_cost: usize, grid: &[Vec<u8>], min_cost: &mut [Vec<usize>]) -> Option<Pos> {
-    if grid[next_pos.x][next_pos.y] < next_min_height {
-        return None
-    }
-    if cur_cost > min_cost[next_pos.x][next_pos.y] {
-        return None
-    }
-    min_cost[cur.x][cur.y] = cur_cost;
-    Some(next_pos)
 }
 
 fn search_depth_first(cur: Step, grid: &[Vec<u8>], min_cost: &mut [Vec<usize>]) {
