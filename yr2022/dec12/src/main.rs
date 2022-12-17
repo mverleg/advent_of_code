@@ -67,28 +67,28 @@ fn solve_costs(data: &str, is_depth_first: bool) -> (Pos, Pos, Vec<Vec<u8>>, Vec
 
 fn search_breadth_first(start: Pos, grid: &[Vec<u8>], min_cost: &mut [Vec<usize>]) {
     let mut queue = VecDeque::with_capacity(grid.len());
-    queue.push_back((start, 0));
-    while let Some((cur, prev_cost)) = queue.pop_front() {
-        if prev_cost >= min_cost[cur.x][cur.y] {
+    queue.push_back((start, 0, grid[start.x][start.y].saturating_sub(1)));
+    while let Some((cur, cur_cost, max_height)) = queue.pop_front() {
+        if grid[cur.x][cur.y] < max_height {
             continue
         }
+        if cur_cost >= min_cost[cur.x][cur.y] {
+            continue
+        }
+        min_cost[cur.x][cur.y] = cur_cost;
         let next_min_height = grid[cur.x][cur.y].saturating_sub(1);
-        if grid[cur.x][cur.y] < next_min_height {
-            continue
-        }
-        min_cost[cur.x][cur.y] = prev_cost;
-        let next_cost = prev_cost + 1;
+        let next_cost = cur_cost + 1;
         if cur.x < grid.len() - 1 {
-            queue.push_back((Pos { x: cur.x + 1, y: cur.y }, next_cost));
+            queue.push_back((Pos { x: cur.x + 1, y: cur.y }, next_cost, next_min_height));
         };
         if cur.x > 0 {
-            queue.push_back((Pos { x: cur.x - 1, y: cur.y }, next_cost));
+            queue.push_back((Pos { x: cur.x - 1, y: cur.y }, next_cost, next_min_height));
         };
         if cur.y < grid[0].len() - 1 {
-            queue.push_back((Pos { x: cur.x, y: cur.y + 1 }, next_cost));
+            queue.push_back((Pos { x: cur.x, y: cur.y + 1 }, next_cost, next_min_height));
         };
         if cur.y > 0 {
-            queue.push_back((Pos { x: cur.x, y: cur.y - 1 }, next_cost));
+            queue.push_back((Pos { x: cur.x, y: cur.y - 1 }, next_cost, next_min_height));
         };
     }
 }
