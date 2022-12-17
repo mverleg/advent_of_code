@@ -66,10 +66,6 @@ fn search_breadth_first(start: Step, grid: &[Vec<u8>], min_cost: &mut [Vec<usize
     queue.push_back(start);
     while let Some(cur) = queue.pop_front() {
         let cur_pos = cur.pos;
-        let mut q = cur.clone();
-        while let Some(p) = q.prev {
-            q = (*p).clone();
-        }
         if cur.cost >= min_cost[cur_pos.x][cur_pos.y] {
             continue;
         }
@@ -93,16 +89,11 @@ fn search_breadth_first(start: Step, grid: &[Vec<u8>], min_cost: &mut [Vec<usize
             let next = Step { pos: Pos { x: cur_pos.x, y: cur_pos.y - 1 }, cost: next_cost, prev: Some(cur_ref) };
             queue.push_back(next);
         };
-        eprintln!("queue: {}", queue.len());  //TODO @mark: TEMPORARY! REMOVE THIS!
     }
 }
 
 fn search_depth_first(cur: Step, grid: &[Vec<u8>], min_cost: &mut [Vec<usize>]) {
     let cur_pos = cur.pos;
-    let mut q = cur.clone();
-    while let Some(p) = q.prev {
-        q = (*p).clone();
-    }
     if cur.cost >= min_cost[cur_pos.x][cur_pos.y] {
         return;
     }
