@@ -1,12 +1,19 @@
+use ::std::env::args;
 use ::std::fs::read_to_string;
 use ::std::rc::Rc;
 
 // long time, only partly because of kids
+// runtime depth-first (release): 6.8s
 
 fn main() {
     let data = read_to_string("data.txt").unwrap();
-    let (start, _end, grid, min_costs) = solve_costs(&data);
-    show_cost_grid(&min_costs);
+    let is_depth_first = if let Some(arg) = args().next() {
+        args == "df"
+    } else {
+        false
+    };
+    let (start, _end, grid, min_costs) = solve_costs(&data, is_depth_first);
+    //show_cost_grid(&min_costs);
     println!("A: {}", part_a(&min_costs, start));
     println!("B: {}", part_b(&min_costs, &grid));
 }
@@ -42,27 +49,28 @@ fn part_b(costs: &[Vec<usize>], grid: &[Vec<u8>]) -> usize {
     lowest_cost
 }
 
-fn solve_costs(data: &str) -> (Pos, Pos, Vec<Vec<u8>>, Vec<Vec<usize>>) {
+fn solve_costs(data: &str, is_depth_first: bool) -> (Pos, Pos, Vec<Vec<u8>>, Vec<Vec<usize>>) {
     let (start, end, grid) = parse(data);
     let mut min_costs = vec![vec![usize::MAX; grid[0].len()]; grid.len()];
-    search(Step { pos: end, cost: 0, prev: None }, &grid, &mut min_costs);
+    if is_depth_first {
+        search_depth_first(Step { pos: end, cost: 0, prev: None }, &grid, &mut min_costs);
+    } else {
+        search_breadth_first(Step { pos: end, cost: 0, prev: None }, &grid, &mut min_costs);
+    }
     (start, end, grid, min_costs)
 }
 
-fn search(cur: Step, grid: &[Vec<u8>], min_cost: &mut [Vec<usize>]) {
-    //eprintln!("{}, {}: c{} h{}", cur.pos.x, cur.pos.y, cur.cost, grid[cur.pos.x][cur.pos.y]);
-    // if cur.pos == end {
-    //     return;
-    // }
+fn search_breadth_first(cur: Step, grid: &[Vec<u8>], min_cost: &mut [Vec<usize>]) {
+    todo!()
+}
+
+fn search_depth_first(cur: Step, grid: &[Vec<u8>], min_cost: &mut [Vec<usize>]) {
     let cur_pos = cur.pos;
     let mut q = cur.clone();
     while let Some(p) = q.prev {
-        //eprint!("{},{}; ", p.pos.x, p.pos.y);
         q = (*p).clone();
     }
-    //eprintln!("!!! {},{}", cur_pos.x, cur_pos.y); //TODO @mark: TEMPORARY! REMOVE THIS!
     if cur.cost >= min_cost[cur_pos.x][cur_pos.y] {
-        //eprintln!("{}, {}  EE", cur_pos.x, cur_pos.y);
         return;
     }
     min_cost[cur_pos.x][cur_pos.y] = cur.cost;
@@ -71,32 +79,19 @@ fn search(cur: Step, grid: &[Vec<u8>], min_cost: &mut [Vec<usize>]) {
     let next_min_height = grid[cur_pos.x][cur_pos.y].saturating_sub(1);
     if cur_pos.x < grid.len() - 1 && grid[cur_pos.x + 1][cur_pos.y] >= next_min_height {
         let next = Step { pos: Pos { x: cur_pos.x + 1, y: cur_pos.y }, cost: next_cost, prev: Some(cur_ref.clone()) };
-        //eprintln!("{}, {}  x+", cur_pos.x, cur_pos.y);
-        search(next, grid, min_cost);
-        //} else {
-        //if cur_pos.x < grid.len() - 1 { eprintln!("{}, {}  x+ NOT h={}", cur_pos.x, cur_pos.y, grid[cur_pos.x + 1][cur_pos.y]) };
+        search_depth_first(next, grid, min_cost);
     };
     if cur_pos.x > 0 && grid[cur_pos.x - 1][cur_pos.y] >= next_min_height {
         let next = Step { pos: Pos { x: cur_pos.x - 1, y: cur_pos.y }, cost: next_cost, prev: Some(cur_ref.clone()) };
-        //eprintln!("{}, {}  x-", cur_pos.x, cur_pos.y);
-        search(next, grid, min_cost);
-        //} else {
-        //if cur_pos.x > 0 { eprintln!("{}, {}  x- NOT h={}", cur_pos.x, cur_pos.y, grid[cur_pos.x - 1][cur_pos.y]) };
+        search_depth_first(next, grid, min_cost);
     };
     if cur_pos.y < grid[0].len() - 1 && grid[cur_pos.x][cur_pos.y + 1] >= next_min_height {
         let next = Step { pos: Pos { x: cur_pos.x, y: cur_pos.y + 1 }, cost: next_cost, prev: Some(cur_ref.clone()) };
-        //eprintln!("{}<{}", cur_pos.y, grid[0].len() - 1);  //TODO @mark: TEMPORARY! REMOVE THIS!
-        //eprintln!("{}, {}  y+", cur_pos.x, cur_pos.y);
-        search(next, grid, min_cost);
-        //} else {
-        //if cur_pos.y < grid[0].len() - 1 { eprintln!("{}, {}  y+ NOT h={}", cur_pos.x, cur_pos.y, grid[cur_pos.x][cur_pos.y + 1]) };
+        search_depth_first(next, grid, min_cost);
     };
     if cur_pos.y > 0 && grid[cur_pos.x][cur_pos.y - 1] >= next_min_height {
         let next = Step { pos: Pos { x: cur_pos.x, y: cur_pos.y - 1 }, cost: next_cost, prev: Some(cur_ref) };
-        //eprintln!("{}, {}  y-", cur_pos.x, cur_pos.y);
-        search(next, grid, min_cost);
-        //} else {
-        //if cur_pos.y > 0 { eprintln!("{}, {}  y- NOT h={}", cur_pos.x, cur_pos.y, grid[cur_pos.x][cur_pos.y - 1]) };
+        search_depth_first(next, grid, min_cost);
     };
 }
 
