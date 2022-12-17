@@ -1,20 +1,24 @@
+use ::std::collections::VecDeque;
 use ::std::env::args;
 use ::std::fs::read_to_string;
 use ::std::rc::Rc;
-use std::collections::VecDeque;
 
 // long time, only partly because of kids
-// runtime depth-first (release): 6.8s
+// runtime depth-first (release) with `while let Some(p) = q.prev {`: 6.8s
+// runtime depth-first (release): 0.066s
+// runtime breadth-first (release): 0.034s
 
 fn main() {
     let data = read_to_string("data.txt").unwrap();
-    let is_depth_first = if let Some(arg) = args().next() {
-        "df" == &arg
+    let args = args().collect::<Vec<_>>();
+    let is_depth_first = if let Some(arg) = args.get(1) {
+        "df" == arg
     } else {
         false
     };
+    println!("is_depth_first = {is_depth_first}  ({:?})", args.get(1));
     let (start, _end, grid, min_costs) = solve_costs(&data, is_depth_first);
-    show_cost_grid(&min_costs);
+    //show_cost_grid(&min_costs);
     println!("A: {}", part_a(&min_costs, start));
     println!("B: {}", part_b(&min_costs, &grid));
 }
@@ -66,6 +70,10 @@ fn search_breadth_first(start: Step, grid: &[Vec<u8>], min_cost: &mut [Vec<usize
     queue.push_back(start);
     while let Some(cur) = queue.pop_front() {
         let cur_pos = cur.pos;
+        let mut q = cur.clone();
+        while let Some(p) = q.prev {
+            q = (*p).clone();
+        }
         if cur.cost >= min_cost[cur_pos.x][cur_pos.y] {
             continue;
         }
@@ -94,6 +102,10 @@ fn search_breadth_first(start: Step, grid: &[Vec<u8>], min_cost: &mut [Vec<usize
 
 fn search_depth_first(cur: Step, grid: &[Vec<u8>], min_cost: &mut [Vec<usize>]) {
     let cur_pos = cur.pos;
+    let mut q = cur.clone();
+    while let Some(p) = q.prev {
+        q = (*p).clone();
+    }
     if cur.cost >= min_cost[cur_pos.x][cur_pos.y] {
         return;
     }
