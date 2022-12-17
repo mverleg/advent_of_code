@@ -1,6 +1,7 @@
 use ::std::env::args;
 use ::std::fs::read_to_string;
 use ::std::rc::Rc;
+use std::collections::VecDeque;
 
 // long time, only partly because of kids
 // runtime depth-first (release): 6.8s
@@ -8,12 +9,12 @@ use ::std::rc::Rc;
 fn main() {
     let data = read_to_string("data.txt").unwrap();
     let is_depth_first = if let Some(arg) = args().next() {
-        args == "df"
+        "df" == &arg
     } else {
         false
     };
     let (start, _end, grid, min_costs) = solve_costs(&data, is_depth_first);
-    //show_cost_grid(&min_costs);
+    show_cost_grid(&min_costs);
     println!("A: {}", part_a(&min_costs, start));
     println!("B: {}", part_b(&min_costs, &grid));
 }
@@ -60,8 +61,40 @@ fn solve_costs(data: &str, is_depth_first: bool) -> (Pos, Pos, Vec<Vec<u8>>, Vec
     (start, end, grid, min_costs)
 }
 
-fn search_breadth_first(cur: Step, grid: &[Vec<u8>], min_cost: &mut [Vec<usize>]) {
-    todo!()
+fn search_breadth_first(start: Step, grid: &[Vec<u8>], min_cost: &mut [Vec<usize>]) {
+    let mut queue = VecDeque::with_capacity(grid.len());
+    queue.push_back(start);
+    while let Some(cur) = queue.pop_front() {
+        let cur_pos = cur.pos;
+        let mut q = cur.clone();
+        while let Some(p) = q.prev {
+            q = (*p).clone();
+        }
+        if cur.cost >= min_cost[cur_pos.x][cur_pos.y] {
+            continue;
+        }
+        min_cost[cur_pos.x][cur_pos.y] = cur.cost;
+        let next_cost = cur.cost + 1;
+        let cur_ref = Rc::new(cur);
+        let next_min_height = grid[cur_pos.x][cur_pos.y].saturating_sub(1);
+        if cur_pos.x < grid.len() - 1 && grid[cur_pos.x + 1][cur_pos.y] >= next_min_height {
+            let next = Step { pos: Pos { x: cur_pos.x + 1, y: cur_pos.y }, cost: next_cost, prev: Some(cur_ref.clone()) };
+            queue.push_back(next);
+        };
+        if cur_pos.x > 0 && grid[cur_pos.x - 1][cur_pos.y] >= next_min_height {
+            let next = Step { pos: Pos { x: cur_pos.x - 1, y: cur_pos.y }, cost: next_cost, prev: Some(cur_ref.clone()) };
+            queue.push_back(next);
+        };
+        if cur_pos.y < grid[0].len() - 1 && grid[cur_pos.x][cur_pos.y + 1] >= next_min_height {
+            let next = Step { pos: Pos { x: cur_pos.x, y: cur_pos.y + 1 }, cost: next_cost, prev: Some(cur_ref.clone()) };
+            queue.push_back(next);
+        };
+        if cur_pos.y > 0 && grid[cur_pos.x][cur_pos.y - 1] >= next_min_height {
+            let next = Step { pos: Pos { x: cur_pos.x, y: cur_pos.y - 1 }, cost: next_cost, prev: Some(cur_ref) };
+            queue.push_back(next);
+        };
+        eprintln!("queue: {}", queue.len());  //TODO @mark: TEMPORARY! REMOVE THIS!
+    }
 }
 
 fn search_depth_first(cur: Step, grid: &[Vec<u8>], min_cost: &mut [Vec<usize>]) {
@@ -98,7 +131,11 @@ fn search_depth_first(cur: Step, grid: &[Vec<u8>], min_cost: &mut [Vec<usize>]) 
 fn show_cost_grid(costs: &[Vec<usize>]) {
     for row in costs {
         for cell in row {
-            print!("{cell: >3} ")
+            if *cell == usize::MAX {
+                print!("*** ")
+            } else {
+                print!("{cell: >3} ")
+            }
         }
         println!("");
     }
